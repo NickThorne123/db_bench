@@ -1,0 +1,55 @@
+version: '3.4'
+
+services:
+# clickhouse containers
+  ch_server:
+    image: clickhouse/clickhouse-server
+    container_name: chs_db
+    restart: always
+    ports:
+      - 8124:8123
+      - 9001:9000
+      - 9364:9363
+    volumes:
+      - ./etc/clickhouse-server/db:/var/lib/clickhouse
+      - ./etc/clickhouse-server/users.d:/etc/clickhouse-server/users.d
+      - ./etc/clickhouse-server/config.d:/etc/clickhouse-server/config.d
+      - ./db/backups:/backups
+    #network_mode: host
+    logging: 
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  ch_client:
+    image: clickhouse/clickhouse-client
+    container_name: chc_db
+    restart: always
+    entrypoint:
+      - /bin/sleep
+    command:
+      - infinity
+    network_mode: host
+    logging: 
+      options:
+        max-size: "10m"
+        max-file: "3"
+ #  Postgres container
+  db:
+    network_mode: host
+    container_name: psql_db
+    restart: always
+    image: postgres:13
+    volumes:
+      - ./db_sd:/var/lib/postgresql/data
+    env_file:
+      - postgres.env
+    ports:
+      - 5432:5432
+ #   networks:
+ #     - app-network
+    logging: 
+      options:
+        max-size: "10m"
+        max-file: "3"
+
