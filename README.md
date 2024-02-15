@@ -132,6 +132,6 @@ Now you can restart the chdemoapp.py app and it should connect to the clickhouse
 
 Note the Dockerfile is unused, but can be used at a later date for deployment as a Docker container, alongside the appropriate service in docker-compose.yml.
 
-# Very Initial Draft Example Screenshot of GUI
+## Very Initial Draft Example Screenshot of GUI
 
 ![Early Draft Example](https://github.com/NickThorne123/db_bench/assets/115091926/e9310617-cec2-46a1-bc32-f8f1c8a9326f)
