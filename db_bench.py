@@ -11,6 +11,8 @@ import os
 
 load_dotenv()
 
+#NOTE To currently run the application - run 'python3 -m streamlit run .\db_bench.py' in the terminal
+
 CH_HOST=os.getenv('CH_HOST')
 CH_PORT=os.getenv('CH_PORT')
 CH_PASSWORD=os.getenv('CH_PASSWORD')
@@ -27,14 +29,14 @@ def get_ch_client():
 
 
 def submit_clicked_postgres(total_elapsed_time_postgres, downsampling_on_off, postgres_out_raw_title, postgres_out, postgres_out_downsampled_title, postgres_out_downsampled, fig_untabbed): #Add the multithreading timer in this function, after a submit button is clicked the timer is started in another thread. When the data is complete the UI displays the total time to display the data.
-    data_process_start_time = time.time()
+    data_process_start_time = time.time() #Gets the start time before the data is processed
     postgres_out_raw_title.write("Raw Data Chart")
-    postgres_out.plotly_chart(fig_untabbed)
-    if downsampling_on_off:
+    postgres_out.plotly_chart(fig_untabbed) #Plots a Plotly chart
+    if downsampling_on_off: #If the downsampling toggle is selected and True
         postgres_out_downsampled_title.write("Downsampled Data Chart")
-        postgres_out_downsampled.plotly_chart(fig_untabbed)
-    data_process_end_time = time.time()
-    total_elapsed_time_postgres.text(f"Execution time: {round(data_process_end_time - data_process_start_time, 3)} seconds") #Shows the elapsed time to 3dp
+        postgres_out_downsampled.plotly_chart(fig_untabbed) #Plots a Plotly chart
+    data_process_end_time = time.time() #Gets the end time after data processing is complete
+    total_elapsed_time_postgres.text(f"Execution time: {round(data_process_end_time - data_process_start_time, 3)} seconds") #Shows the elapsed time to 3dp above the charts
 
 
 def postgres_data_benchmarking_setup():

@@ -1,6 +1,8 @@
 import datetime as dt
 from streamlit.testing.v1 import AppTest
 
+#NOTE Currently needs to be run using - 'pytest .\tests\tests_postgress.py -v' - May need to be in the VM to run it correctly
+
 def test_1_downsample_postgres_enable():
     """A test to check whether the downsample toggle can be clicked to enable it"""
     at = AppTest.from_file("db_bench.py").run()
@@ -46,3 +48,8 @@ def test_14_set_end_date_value_postgres():
 #         at = AppTest.from_file("db_bench.py").run()
 #         at.time_input(key="end_time_postgres").set_value(dt.time(7, 30))
 #         assert at.date_input(key="end_time_postgres").value == (dt.time(7, 30),) #Dates in a weird format for some reason
+
+def test__submit_postgres(): #NOTE For some reason this doesn't recognise the key - Will look into it
+        """A test to click the submit button and start collecting postgres data"""
+        at = AppTest.from_file("db_bench.py").run()
+        assert at.button(key="submit_postgres").click().run()
