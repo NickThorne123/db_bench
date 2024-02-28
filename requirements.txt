@@ -1,7 +1,7 @@
 pip==24.0
+pytest==8.0.1
 pandas==2.2.0
-dash==2.15.0
-dash-daq==0.5.0
+streamlit==1.31.1
 plotly==5.18.0
 clickhouse-driver==0.2.6
 python-dotenv==1.0.1
