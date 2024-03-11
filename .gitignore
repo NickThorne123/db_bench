@@ -1,0 +1,7 @@
+.venv
+etc/clickhouse-server/db
+.vscode/launch.json
+.vscode/settings.json
+.env
+postgres.env
+db_sd
