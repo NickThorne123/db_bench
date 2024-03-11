@@ -4,3 +4,4 @@ etc/clickhouse-server/db
 .vscode/settings.json
 .env
 postgres.env
+db_sd
