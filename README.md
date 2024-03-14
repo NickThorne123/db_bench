@@ -90,6 +90,25 @@ cp .vscode/launch_example.json .vscode/launch.json
 cp .env_example .env
 cp postgres.env_example postgres.env
 ```
+Enable all user permissions
+```
+cd etc\clickhouse-server
+```
+
+In chuser.xml, add the grant to the user profile:
+```
+    <chuser>
+        <profile>ch_profile</profile>
+        <networks>
+                <ip>::/0</ip>
+        </networks>
+        <password>chuser_pwd</password>
+        <quota>ch_quota</quota>
+        <grants>
+        <query>GRANT ALL ON *.*</query>
+        </grants>
+    </chuser>
+```
 
 Enable all user permissions
 ```

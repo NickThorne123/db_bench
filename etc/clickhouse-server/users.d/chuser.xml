@@ -10,7 +10,9 @@
           <password>chuser_pwd</password>
           <quota>ch_quota</quota>
           <grants>
-            <query>GRANT ALL ON *.*</query>
+          <query>GRANT ALL ON *.*</query>
+          </grants>
+
       </chuser>
     </users>
      <!-- Quotas. -->
