@@ -90,6 +90,25 @@ cp .vscode/launch_example.json .vscode/launch.json
 cp .env_example .env
 cp postgres.env_example postgres.env
 ```
+Enable all user permissions
+```
+cd etc\clickhouse-server
+```
+
+In chuser.xml, add the grant to the user profile:
+```
+    <chuser>
+        <profile>ch_profile</profile>
+        <networks>
+                <ip>::/0</ip>
+        </networks>
+        <password>chuser_pwd</password>
+        <quota>ch_quota</quota>
+        <grants>
+        <query>GRANT ALL ON *.*</query>
+        </grants>
+    </chuser>
+```
 
 This will create a subdirectory ```.venv``` containing a virtual Python environment isolating the project from other projects on your computer. You may want to move across to using the poetry package manager as one of your deliverables. It handles dependencies in a more intelligent way than venv and pip.
 
