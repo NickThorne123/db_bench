@@ -9,10 +9,12 @@
             </networks>
           <password>chuser_pwd</password>
           <quota>ch_quota</quota>
+          <grants>
+            <query>GRANT ALL ON *.*</query>
       </chuser>
     </users>
      <!-- Quotas. -->
-    <quotas>
+    <quotas> 
         <!-- Name of quota. -->
         <ch_quota>
             <!-- Limits for time interval. You could specify many intervals with different limits. -->
