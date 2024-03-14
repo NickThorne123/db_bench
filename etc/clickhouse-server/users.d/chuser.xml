@@ -14,7 +14,7 @@
       </chuser>
     </users>
      <!-- Quotas. -->
-    <quotas>
+    <quotas> 
         <!-- Name of quota. -->
         <ch_quota>
             <!-- Limits for time interval. You could specify many intervals with different limits. -->
