@@ -86,7 +86,7 @@ pip install -r requirements.txt
 
 Create local versions of the config files
 ```
-cp .vscode/launch_example.json .vscode/launch.json
+cp .vscode/launch.json.example .vscode/launch.json
 cp .env_example .env
 cp postgres.env_example postgres.env
 ```
