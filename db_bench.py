@@ -2,6 +2,8 @@ from datetime import date, datetime as dt
 from dotenv import load_dotenv
 from clickhouse_driver import Client
 import streamlit as st
+from streamlit_option_menu import option_menu
+from PIL import Image
 import plotly.express as px
 import datetime
 import pandas as pd
@@ -18,9 +20,12 @@ CH_PASSWORD=os.getenv('CH_PASSWORD')
 CH_USER=os.getenv('CH_USER')
 CH_DBNAME=os.getenv('CH_DBNAME')
 
-st.set_page_config(page_title="DB Benchmark")
+filename = "./icons/pageIcon.png"
+img = Image.open(filename)
+st.set_page_config(page_title="DB Benchmark", page_icon=img)
 st.markdown("<style>div.row-widget.stRadio > div{flex-direction:row;}</style>", unsafe_allow_html=True) #Shows radio buttons in a row. Streamlit default is vertical list
 
+### Clickhouse region
 def get_ch_client():
     """Create a Clickhouse DB client object (aka connection)"""
     client = Client(host="localhost", port=9001, settings={'use_numpy': True}, user="chuser", password="chuser_pwd") #TODO shouldn't be hard coded
@@ -89,7 +94,11 @@ def submit_clicked_clickhouse(total_elapsed_time_clickhouse_downsampled, total_e
 
 def clickhouse_data_benchmarking_setup():
     """Displays the layout of the clickhouse widgets in streamlit"""
-    st.subheader("Clickhouse")
+    col1, col2 = st.columns([1,11])
+    with col1:
+        st.image("./icons/clickhouseLogo.png", width=50)
+    with col2:
+        st.markdown("<h3 style='text-align: left;'>ClickhouseDB</h3>", unsafe_allow_html=True)
 
     start_time_date_col, end_time_date_col = st.columns([1, 1]) #Creates columns for the start and end date / time pickers
     with start_time_date_col:
@@ -127,6 +136,133 @@ def clickhouse_data_benchmarking_setup():
         submit_clicked_clickhouse(total_elapsed_time_clickhouse_downsampled, total_elapsed_time_clickhouse_raw, downsampling_on_off, clickhouse_out_raw_title, clickhouse_out, 
                                   clickhouse_out_downsampled_title, clickhouse_out_downsampled, clickhouse_start_datetime, clickhouse_end_datetime, downsampling_value, 
                                   total_ram_usage_clickhouse_raw, total_ram_usage_clickhouse_downsampled)
+        
 
-st.markdown("<h1 style='text-align: center;'>Database Benchmarking</h1>", unsafe_allow_html=True)
-clickhouse_data_benchmarking_setup()
+### PostgreSQL Region
+        
+def postgresql_data_benchmarking_setup():
+    """Displays the layout of the postgreSQL widgets in streamlit"""
+    col1, col2 = st.columns([1,11])
+    with col1:
+        st.image("./icons/postgresqlLogo.png", width=50)
+    with col2:
+        st.markdown("<h3 style='text-align: left;'>PostgreSQL</h3>", unsafe_allow_html=True)
+
+    start_time_date_col, end_time_date_col = st.columns([1, 1]) #Creates columns for the start and end date / time pickers
+    with start_time_date_col:
+        start_date_postgresql = st.date_input("Data Start Date:", datetime.date(2021, 1, 1), key="start_date_postgresql")
+        start_time_postgresql = st.time_input("Data Start Time:", key="start_time_postgresql")
+    with end_time_date_col:
+        end_date_postgresql = st.date_input("Data End Date:", datetime.date(2022, 1, 2), key="end_date_postgresql")
+        end_time_postgresql = st.time_input("Data End Time:", key="end_time_postgresql")
+    postgresql_start_datetime = datetime.datetime.combine(start_date_postgresql, start_time_postgresql) #concatenates the date and time
+    postgresql_end_datetime = datetime.datetime.combine(end_date_postgresql, end_time_postgresql)
+
+    st.write("") #padding
+
+
+### TimescaleDB Region
+    
+def timescaledb_data_benchmarking_setup():
+    """Displays the layout of the timescaledb widgets in streamlit"""
+    col1, col2 = st.columns([1,10])
+    with col1:
+        st.image("./icons/TimeScaleLogo.png", width=50)
+    with col2:
+        st.markdown("<h3 style='text-align: left;'>TimescaleDB</h3>", unsafe_allow_html=True)
+
+    start_time_date_col, end_time_date_col = st.columns([1, 1]) #Creates columns for the start and end date / time pickers
+    with start_time_date_col:
+        start_date_timescaledb = st.date_input("Data Start Date:", datetime.date(2021, 1, 1), key="start_date_timescaledb")
+        start_time_timescaledb = st.time_input("Data Start Time:", key="start_time_timescaledb")
+    with end_time_date_col:
+        end_date_timescaledb= st.date_input("Data End Date:", datetime.date(2022, 1, 2), key="end_date_timescaledb")
+        end_time_timescaledb = st.time_input("Data End Time:", key="end_time_timescaledb")
+    timescaledb_start_datetime = datetime.datetime.combine(start_date_timescaledb, start_time_timescaledb) #concatenates the date and time
+    timescaledb_end_datetime = datetime.datetime.combine(end_date_timescaledb, end_time_timescaledb)
+
+    st.write("") #padding
+
+
+### Streamlit GUI
+        
+selected = option_menu(
+    menu_title=None,
+    options=["Home", "ClickHouse", "PostgreSQL", "TimescaleDB"],
+    icons=["house", "kanban", "database-fill", "graph-down"],
+    menu_icon="cast",
+    default_index=0,
+    orientation="horizontal",
+    styles={
+        "container": {"padding": "0!important", "background-color": "#fafafa"},
+        "icon": {"color": "blue", "font-size": "20px"},
+        "nav-link": {"font-size": "15px", "text-align": "left", "margin": "0px", "--hover-color": "#eee"},
+        "nav-link-selected": {"background-color": "#89cff0"},
+    }
+
+)
+
+### Home Page
+if selected == "Home":
+    col1, col2 = st.columns([1,7])
+    with col1:
+        st.image(filename, width=70)
+    with col2:
+        st.markdown("<h1 style='text-align: left;'>Database Benchmarking</h1>", unsafe_allow_html=True)
+
+    
+    st.write("""This application is a streamlit web app which plots scalar values over time, 
+             with a start / end datetime picker and a database source picker. Created by students at Southampton Solent University for one of our modules, 
+             these students are:
+             Josh Clarke, Daniel Agha, Iona Pitt, Kyle Roberts and Luke Wood""")
+    
+    st.write("The database source options for this application are:")
+
+    col3, col4 = st.columns([1,10])
+    with col3:
+        st.image("./icons/clickhouseLogo.png", width=45)
+    with col4:
+        st.markdown("<h3 style='text-align: left;'>ClickhouseDB</h3>", unsafe_allow_html=True)
+
+    with col3:
+        st.image("./icons/postgresqlLogo.png", width=45)
+    with col4:
+        st.markdown("<h3 style='text-align: left;'>PostgreSQL</h3>", unsafe_allow_html=True)
+
+    with col3:
+        st.image("./icons/TimescaleLogo.png", width=45)
+    with col4:
+        st.markdown("<h3 style='text-align: left;'>TimescaleDB</h3>", unsafe_allow_html=True)
+
+    st.write("On each page there is: ")
+    st.markdown("- A date and time picker, for the start / end date that the data is plotted")
+    st.markdown("- A submit button that when pressed fetches the data for the plot")
+    st.markdown("- A ‘downsampling on-off’ toggle")
+    st.markdown("- A downsampling count text entry.")
+
+
+    st.write("""
+                On pressing ‘submit’ a timer is started that times how long it takes to fetch the data 
+                (note this will not include the time taken for the charting library to load it). 
+                The elapsed time will be displayed on the dashboard near the line chart. 
+                Text boxes will be populated showing the space taken up on disk for the table, 
+                and the number of rows in the table. 
+                A text box showing GB of disk storage per million rows will be shown.
+                """)
+
+
+### Clickhouse Page
+if selected == "ClickHouse":
+    clickhouse_data_benchmarking_setup()
+
+
+### PostgreSQL Page
+if selected == "PostgreSQL":
+    postgresql_data_benchmarking_setup()
+
+
+### TimescaleDB Page
+if selected == "TimescaleDB":
+    timescaledb_data_benchmarking_setup()
+
+
