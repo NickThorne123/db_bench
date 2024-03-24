@@ -42,5 +42,30 @@ def timescaledb_data_benchmarking_setup():
     timescaledb_end_datetime = datetime.datetime.combine(end_date_timescaledb, end_time_timescaledb)
 
 
+    st.write("") #padding
+
+    downsampling_value = st.empty()
+    downsampling_on_off = st.toggle("Downsampling On/Off", key="downsample_toggle_timescaledb")
+    if downsampling_on_off:
+        downsampling_value = st.number_input("Downsample Value:", min_value=5, max_value=5000, key="downsample_value_timescaledb")
+
+    st.write("") #padding
+
+    #GUI chart widget placement
+    total_rows_text = st.empty()
+    total_disk_usage_timescaledb = st.empty() #Total disk usage
+    run_query_submit = st.button("Submit", key="submit_timescaledb")
+    timescaledb_out_raw_title = st.empty()
+    total_elapsed_time_timescaledb_raw = st.empty() #Empty templates in the place they will appear on the UI. Can be called at any time using any widget)
+    total_ram_usage_timescaledb_raw = st.empty()
+    timescaledb_out = st.empty()
+    timescaledb_out_downsampled_title = st.empty()
+    total_elapsed_time_timescaledb_downsampled = st.empty() #Empty templates in the place they will appear on the UI. Can be called at any time using any widget
+    timescaledb_out_downsampled = st.empty()
+
+    # if run_query_submit:
+    #     submit_clicked_timescaledb(total_elapsed_time_timescaledb_downsampled, total_elapsed_time_timescaledb_raw, downsampling_on_off, timescaledb_out_raw_title, timescaledb_out, 
+    #                               timescaledb_out_downsampled_title, timescaledb_out_downsampled, timescaledb_start_datetime, timescaledb_end_datetime, downsampling_value, 
+    #                               total_ram_usage_timescaledb_raw, total_disk_usage_timescaledb, total_rows_text)
 ### Show Streamlit GUI
 timescaledb_data_benchmarking_setup()
