@@ -23,18 +23,17 @@ CH_DBNAME=os.getenv('CH_DBNAME')
 filename = "./icons/pageIcon.png"
 img = Image.open(filename)
 st.set_page_config(page_title="DB Benchmark", page_icon=img)
-st.markdown("<style>div.row-widget.stRadio > div{flex-direction:row;}</style>", unsafe_allow_html=True) #Shows radio buttons in a row. Streamlit default is vertical list
 
 ### Clickhouse region
 def get_ch_client():
     """Create a Clickhouse DB client object (aka connection)"""
-    client = Client(host="localhost", port=9001, settings={'use_numpy': True}, user="chuser", password="chuser_pwd") #TODO shouldn't be hard coded
+    client = Client(host=CH_HOST, port=CH_PORT, settings={'use_numpy': True}, user=CH_USER, password=CH_PASSWORD)
     return client
 
 
 def submit_clicked_clickhouse(total_elapsed_time_clickhouse_downsampled, total_elapsed_time_clickhouse_raw, downsampling_on_off, clickhouse_out_raw_title, clickhouse_out,
                                clickhouse_out_downsampled_title, clickhouse_out_downsampled, clickhouse_start_datetime, clickhouse_end_datetime, downsampling_value, 
-                               total_ram_usage_clickhouse_raw, total_ram_usage_clickhouse_downsampled):
+                               total_ram_usage_clickhouse_raw, total_disk_usage_clickhouse, total_rows_text):
     """Performs the logic to get the data from the clickhouse DB and outputs it onto streamlit when submit is clicked"""
     client = get_ch_client()
     process = psutil.Process()
@@ -43,6 +42,16 @@ def submit_clicked_clickhouse(total_elapsed_time_clickhouse_downsampled, total_e
         #Get total row count
         total_rows_query =  f""" SELECT count(*) FROM ts_db.demo_ts  """
         total_rows = client.execute(total_rows_query, settings={'use_numpy': True})[0][0]
+
+        total_rows_text.text(f"Total Rows in Clickhouse Database: {total_rows:,}")
+
+        #Get clickhouse table size _ Int = 4 bytes and Datetime = 4 bytes in Clickhouse
+        #NOTE if an SQL command to check the table size can be found then use that instead but this should be accurate
+        total_table_size = round(((total_rows * 8) / 1024 ** 2), 2)
+        if total_table_size >= 1024: #If size is over 1024MB, divide by 1024 and show as GB
+            total_disk_usage_clickhouse.text(f"Total Disk Usage for Clickhouse Database: {total_table_size / 1024}GB")
+        else:
+            total_disk_usage_clickhouse.text(f"Total Disk Usage for Clickhouse Database: {total_table_size}MB")
 
         res_count_query =  f""" SELECT count(*) FROM ts_db.demo_ts WHERE cdatetime BETWEEN toDateTime('{clickhouse_start_datetime}') AND toDateTime('{clickhouse_end_datetime}') """
         res_count = client.execute(res_count_query, settings={'use_numpy': True})[0][0]
@@ -58,17 +67,16 @@ def submit_clicked_clickhouse(total_elapsed_time_clickhouse_downsampled, total_e
         fig = px.line(df, x='cdatetime', y='ts_values')
         fig.update_layout(xaxis_title='Date and Time', yaxis_title = 'Raw Value')
         fig.update_xaxes(range=[clickhouse_start_datetime, clickhouse_end_datetime]) # Don't let chart autoscale as loses impact of how few samples we're pulling compared to downsampled
-        clickhouse_out_raw_title.write(f"Raw Data Chart of 500,000 samples - {total_rows:,} Total Rows")
+        clickhouse_out_raw_title.write(f"Raw Data Chart of 500,000 samples")
         clickhouse_out.plotly_chart(fig) #Plots a Plotly chart
 
         data_process_end_time_raw = time.time() #Gets the end time after data processing is complete
         memory_usage_post_raw = process.memory_info().rss / 1024 ** 2 #Gets the amount of RAM used as the process is being run in MB
 
-        total_elapsed_time_clickhouse_raw.text(f"Raw Samples Execution time: {round(data_process_end_time_raw - data_process_start_time_raw, 3)} seconds") 
+        total_elapsed_time_clickhouse_raw.text(f"Raw Samples Execution time: {round(data_process_end_time_raw - data_process_start_time_raw, 3)} seconds")
         total_ram_usage_clickhouse_raw.text(f"RAM Usage: {round(memory_usage_post_raw - memory_usage_pre_raw, 2)}MB") #Shows the elapsed time and RAM usage to 3dp above the charts
 
         if downsampling_on_off: #If the downsampling toggle is selected and True
-            memory_usage_pre_downsampled = process.memory_info().rss / 1024 ** 2 #Gets the amount of RAM used as the process is being run in MB
             data_process_start_time_downsampled = time.time() #Gets the start time before the data is processed
 
             #Shows downsampled values
@@ -83,10 +91,8 @@ def submit_clicked_clickhouse(total_elapsed_time_clickhouse_downsampled, total_e
             clickhouse_out_downsampled.plotly_chart(fig_agg) #Plots a Plotly chart
 
             data_process_end_time_downsampled = time.time() #Gets the start time before the data is processed
-            memory_usage_post_downsampled = process.memory_info().rss / 1024 ** 2 #Gets the amount of RAM used as the process is being run in MB
 
             total_elapsed_time_clickhouse_downsampled.text(f"Downsampled Execution time: {round(data_process_end_time_downsampled - data_process_start_time_downsampled, 3)} seconds") #Shows the elapsed time to 3dp above the charts
-            total_ram_usage_clickhouse_downsampled.text(f"RAM Usage: {round(memory_usage_pre_downsampled - memory_usage_post_downsampled, 2)}MB") #Shows the elapsed time and RAM usage to 3dp above the charts (RAM usage is higher directly after raw processing hence pre - post)
     except Exception as a:
         print(f'update_output error {a}')
         st.error(f'update_output error {a}')
@@ -112,30 +118,29 @@ def clickhouse_data_benchmarking_setup():
 
     st.write("") #padding
 
-    #down_sampling_time_span = st.empty() #When the radio buttons and number input are enabled, they will appear in the position on the page # NOTE possibly unecessary
     downsampling_value = st.empty()
     downsampling_on_off = st.toggle("Downsampling On/Off", key="downsample_toggle_clickhouse")
     if downsampling_on_off:
-        #down_sampling_time_span.radio("Downsampling Timeframe:", ["Seconds", "Minutes", "Hours", "Days", "Weeks", "Months", "Years"], key="clickhouse_downsample_time") # NOTE possibly unecessary
         downsampling_value = st.number_input("Downsample Value:", min_value=5, max_value=5000, key="downsample_value_clickhouse")
 
     st.write("") #padding
 
     #GUI chart widget placement
+    total_rows_text = st.empty()
+    total_disk_usage_clickhouse = st.empty() #Total disk usage
     run_query_submit = st.button("Submit", key="submit_clickhouse")
     clickhouse_out_raw_title = st.empty()
-    total_elapsed_time_clickhouse_raw = st.empty() #Empty templates in the place they will appear on the UI. Can be called at any time using any widget
+    total_elapsed_time_clickhouse_raw = st.empty() #Empty templates in the place they will appear on the UI. Can be called at any time using any widget)
     total_ram_usage_clickhouse_raw = st.empty()
     clickhouse_out = st.empty()
     clickhouse_out_downsampled_title = st.empty()
     total_elapsed_time_clickhouse_downsampled = st.empty() #Empty templates in the place they will appear on the UI. Can be called at any time using any widget
-    total_ram_usage_clickhouse_downsampled = st.empty()
     clickhouse_out_downsampled = st.empty()
 
     if run_query_submit:
         submit_clicked_clickhouse(total_elapsed_time_clickhouse_downsampled, total_elapsed_time_clickhouse_raw, downsampling_on_off, clickhouse_out_raw_title, clickhouse_out, 
                                   clickhouse_out_downsampled_title, clickhouse_out_downsampled, clickhouse_start_datetime, clickhouse_end_datetime, downsampling_value, 
-                                  total_ram_usage_clickhouse_raw, total_ram_usage_clickhouse_downsampled)
+                                  total_ram_usage_clickhouse_raw, total_disk_usage_clickhouse, total_rows_text)
         
 
 ### PostgreSQL Region
@@ -190,6 +195,7 @@ selected = option_menu(
     menu_title=None,
     options=["Home", "ClickHouse", "PostgreSQL", "TimescaleDB"],
     icons=["house", "kanban", "database-fill", "graph-down"],
+    key="page_selection",
     menu_icon="cast",
     default_index=0,
     orientation="horizontal",
@@ -210,7 +216,6 @@ if selected == "Home":
     with col2:
         st.markdown("<h1 style='text-align: left;'>Database Benchmarking</h1>", unsafe_allow_html=True)
 
-    
     st.write("""This application is a streamlit web app which plots scalar values over time, 
              with a start / end datetime picker and a database source picker. Created by students at Southampton Solent University for one of our modules, 
              these students are:
@@ -240,7 +245,6 @@ if selected == "Home":
     st.markdown("- A ‘downsampling on-off’ toggle")
     st.markdown("- A downsampling count text entry.")
 
-
     st.write("""
                 On pressing ‘submit’ a timer is started that times how long it takes to fetch the data 
                 (note this will not include the time taken for the charting library to load it). 
@@ -264,5 +268,3 @@ if selected == "PostgreSQL":
 ### TimescaleDB Page
 if selected == "TimescaleDB":
     timescaledb_data_benchmarking_setup()
-
-
