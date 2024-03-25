@@ -190,7 +190,7 @@ and generate some data with
 WITH time_series AS (
 	SELECT * FROM generate_series(
 	  '2021-01-01 00:00:00'::timestamp,
-	  '2021-01-01 00:10:00'::timestamp,
+	  '2022-01-01 00:10:00'::timestamp,
 	  '1 second'::interval
 	) as cdatetime
 ),
