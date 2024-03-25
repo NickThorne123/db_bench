@@ -134,7 +134,9 @@ This will create a subdirectory ```.venv``` containing a virtual Python environm
 
 If you're using VS Code, note the .vscode directory which contains an entry allowing you to [start and debug](https://code.visualstudio.com/docs/languages/python#_debugging) the project.
 
-You can try this now, but will likely get errors about not being able to connect to the database. So the next step is to run up the Docker containers for Clickhouse and configure them. You will need [Docker Desktop installed](https://docs.docker.com/desktop/install/mac-install/) on your machine. 
+## Configuring ClickHouseDB
+
+You can try this now, but will likely get errors about not being able to connect to the database. So the next step is to run up the Docker containers for Clickhouse and configure them. You will need [Docker Desktop installed](https://docs.docker.com/desktop/install/mac-install/) on your machine.
 
 ```
 cd db_bench
@@ -169,6 +171,39 @@ SELECT toDateTime(arrayJoin(range(toUInt32(toDateTime('2021-01-01 00:00:00')), t
 
 Make sure all the packages in ```chdemoapp.py``` have been installed, and then you can start the app and it should connect to the ClickHouse database and show some data.
 
+## Configuring PostgreSQL
+
+To configure Postgres, run the command ```docker compose up db```. This will create the ```psql_db``` container. Go to DBeaver and create a new connection to a Postgres database on port 5432 with the username ```postgres``` and password ```postgres```.
+
+Once connected, create a table with the SQL command
+
+```
+CREATE TABLE demo_ts (
+   cdatetime DATE,
+   ts_values INTEGER
+);
+```
+
+and generate some data with
+
+```
+WITH time_series AS (
+	SELECT * FROM generate_series(
+	  '2021-01-01 00:00:00'::timestamp,
+	  '2022-01-01 00:10:00'::timestamp,
+	  '1 second'::interval
+	) as cdatetime
+),
+random_values AS (
+    SELECT random() * 100 AS ts_values -- Adjust range as needed
+    FROM generate_series(1, 10) -- Generate 10 random values
+)
+INSERT INTO demo_ts (cdatetime, ts_values)
+SELECT time_series.cdatetime, random_values.ts_values
+FROM time_series
+CROSS JOIN random_values;
+```
+
 Note the Dockerfile is unused, but can be used at a later date for deployment as a Docker container, alongside the appropriate service in docker-compose.yml.
 
 ### Troubleshooting
@@ -178,6 +213,12 @@ ImportError: cannot import name 'load_dotenv' from 'dotenv'
 ```
 
 If you get the error message shown above, install the package ```python_dotenv``` instead of ```dotenv```. You do not need to change the import name, as ```dotenv``` will automatically be installed with ```python_dotenv```.
+
+```
+toml.decoder.TomlDecodeError: Key group not on a line by itself. (line 1 column 1 char 0)
+```
+
+If you get the error message shown above, go to your ```.streamlit``` folder on your computer (default is at ```C:\Users\Username\.streamlit```) and delete the ```config.toml``` file.
 
 ## Very Initial Draft Example Screenshot of GUI
 
