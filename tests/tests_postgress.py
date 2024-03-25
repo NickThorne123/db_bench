@@ -155,14 +155,54 @@ def test_25_submit_timescaledb():
         at = AppTest.from_file("pages/TimescaleDB.py").run()
         assert at.button(key="submit_timescaledb").click().run()
 
-def test_26_edit_all_values_postgresql():
-       """A test to change all the controlable values for the chosen DB then check they are the same when Submit button selected"""
-       pass
+@pytest.mark.xfail(reason=("Times out after 3 seconds due to data being imported"))
+def test_26_edit_all_values_clickhouse():
+        """A test to change all the controlable values for the chosen DB then check they are the same when Submit button selected"""
+        at = AppTest.from_file("pages/ClickhouseDB.py").run()
+        at.toggle(key="downsample_toggle_clickhouse").set_value(1).run()
+        at.number_input(key="downsample_value_clickhouse").set_value(5000).run()
+        at.date_input(key="start_date_clickhouse").set_value(dt.date(2021, 9, 8)).run()
+        at.date_input(key="end_date_clickhouse").set_value(dt.date(2022, 6, 6)).run()
+        at.time_input(key="start_time_clickhouse").set_value(dt.time(11, 35))
+        at.time_input(key="end_time_clickhouse").set_value(dt.time(14, 00))
+        at.button(key="submit_clickhouse").click().run()
+        
+        if at.number_input(key="downsample_value_clickhouse").value == 5000 and at.date_input(key="start_date_clickhouse").value == dt.date(2021, 9, 8) and at.date_input(key="end_date_clickhouse").value == dt.date(2022, 6, 6) \
+                and at.time_input(key="start_time_clickhouse").value == (dt.time(11, 35)) and at.time_input(key="end_time_clickhouse").value == (dt.time(14, 00)):
+               assert True
+        else:
+               assert False
 
 def test_27_edit_all_values_postgresql():
-       """A test to change all the controlable values for the chosen DB then check they are the same when Submit button selected"""
-       pass
+        """A test to change all the controlable values for the chosen DB then check they are the same when Submit button selected"""
+        at = AppTest.from_file("pages/PostgresqlDB.py").run()
+        at.toggle(key="downsample_toggle_postgresql").set_value(1).run()
+        at.number_input(key="downsample_value_postgresql").set_value(5000).run()
+        at.date_input(key="start_date_postgresql").set_value(dt.date(2021, 9, 8)).run()
+        at.date_input(key="end_date_postgresql").set_value(dt.date(2022, 6, 6)).run()
+        at.time_input(key="start_time_postgresql").set_value(dt.time(11, 35))
+        at.time_input(key="end_time_postgresql").set_value(dt.time(14, 00))
+        at.button(key="submit_postgresql").click().run()
 
-def test_28_edit_all_values_postgresql():
-       """A test to change all the controlable values for the chosen DB then check they are the same when Submit button selected"""
-       pass
+        if at.number_input(key="downsample_value_postgresql").value == 5000 and at.date_input(key="start_date_postgresql").value == dt.date(2021, 9, 8) and at.date_input(key="end_date_postgresql").value == dt.date(2022, 6, 6) \
+                and at.time_input(key="start_time_postgresql").value == (dt.time(11, 35)) and at.time_input(key="end_time_postgresql").value == (dt.time(14, 00)):
+                assert True
+        else:
+                assert False
+
+def test_28_edit_all_values_timescaledb():
+        """A test to change all the controlable values for the chosen DB then check they are the same when Submit button selected"""
+        at = AppTest.from_file("pages/TimescaleDB.py").run()
+        at.toggle(key="downsample_toggle_timescaledb").set_value(1).run()
+        at.number_input(key="downsample_value_timescaledb").set_value(5000).run()
+        at.date_input(key="start_date_timescaledb").set_value(dt.date(2021, 9, 8)).run()
+        at.date_input(key="end_date_timescaledb").set_value(dt.date(2022, 6, 6)).run()
+        at.time_input(key="start_time_timescaledb").set_value(dt.time(11, 35))
+        at.time_input(key="end_time_timescaledb").set_value(dt.time(14, 00))
+        at.button(key="submit_timescaledb").click().run()
+
+        if at.number_input(key="downsample_value_timescaledb").value == 5000 and at.date_input(key="start_date_timescaledb").value == dt.date(2021, 9, 8) and at.date_input(key="end_date_timescaledb").value == dt.date(2022, 6, 6) \
+                and at.time_input(key="start_time_timescaledb").value == (dt.time(11, 35)) and at.time_input(key="end_time_timescaledb").value == (dt.time(14, 00)):
+                assert True
+        else:
+                assert False
