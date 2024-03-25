@@ -36,21 +36,25 @@ services:
         max-file: "3"
  #  Postgres container
   db:
-    network_mode: host
+    # network_mode: host
     container_name: psql_db
     restart: always
     image: postgres:13
-    volumes:
-      - ./db_sd:/var/lib/postgresql/data
+    # volumes:
+    #   - ./db_sd:/var/lib/postgresql/data
+    #   - ./scripts/:/docker-entrypoint-initdb.d/
     env_file:
       - postgres.env
     ports:
       - 5432:5432
- #   networks:
- #     - app-network
     logging: 
       options:
         max-size: "10m"
         max-file: "3"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=db
+
   
 
