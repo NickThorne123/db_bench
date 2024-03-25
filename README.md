@@ -179,6 +179,12 @@ ImportError: cannot import name 'load_dotenv' from 'dotenv'
 
 If you get the error message shown above, install the package ```python_dotenv``` instead of ```dotenv```. You do not need to change the import name, as ```dotenv``` will automatically be installed with ```python_dotenv```.
 
+```
+toml.decoder.TomlDecodeError: Key group not on a line by itself. (line 1 column 1 char 0)
+```
+
+If you get the error message shown above, go to your ```.streamlit``` folder on your computer (default is at ```C:\Users\Username\.streamlit```) and delete the ```config.toml``` file.
+
 ## Very Initial Draft Example Screenshot of GUI
 
 ![Early Draft Example](https://github.com/NickThorne123/db_bench/assets/115091926/e9310617-cec2-46a1-bc32-f8f1c8a9326f)
