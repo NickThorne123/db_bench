@@ -86,9 +86,48 @@ pip install -r requirements.txt
 
 Create local versions of the config files
 ```
-cp .vscode/launch_example.json .vscode/launch.json
+cp .vscode/launch.json.example .vscode/launch.json
 cp .env_example .env
 cp postgres.env_example postgres.env
+```
+Enable all user permissions
+```
+cd etc\clickhouse-server
+```
+
+In chuser.xml, add the grant to the user profile:
+```
+    <chuser>
+        <profile>ch_profile</profile>
+        <networks>
+                <ip>::/0</ip>
+        </networks>
+        <password>chuser_pwd</password>
+        <quota>ch_quota</quota>
+        <grants>
+        <query>GRANT ALL ON *.*</query>
+        </grants>
+    </chuser>
+```
+
+Enable all user permissions
+```
+cd etc\clickhouse-server
+```
+
+In chuser.xml, add the grant to the user profile:
+```
+    <chuser>
+        <profile>ch_profile</profile>
+        <networks>
+                <ip>::/0</ip>
+        </networks>
+        <password>chuser_pwd</password>
+        <quota>ch_quota</quota>
+        <grants>
+        <query>GRANT ALL ON *.*</query>
+        </grants>
+    </chuser>
 ```
 
 This will create a subdirectory ```.venv``` containing a virtual Python environment isolating the project from other projects on your computer. You may want to move across to using the poetry package manager as one of your deliverables. It handles dependencies in a more intelligent way than venv and pip.
@@ -101,36 +140,44 @@ You can try this now, but will likely get errors about not being able to connect
 cd db_bench
 docker-compose up ch_server ch_client
 ```
-This will build your contaienrs and run them locally. You can see their status with ``` docker container ls -a```.
+This will build your containers and run them locally. You can see their status with ``` docker container ls -a```.
 
-Now we need to check that the clickhouse database is running locally, choose your preferred SQL client. I like to use [DBeaver](https://dbeaver.io/download/). Create a connection of type Clickhouse on localhost, port ``` 8123  ``` (specified in docker-compose.yml), user ``` chuser ``` and password ```chuser_pwd ```  (specified in /etc/clickhouse-server/users.d/chuser.xml and .env) and we start with database ``` default ```.
+Now we need to check that the clickhouse database is running locally, choose your preferred SQL client. I like to use [DBeaver](https://dbeaver.io/download/). Create a connection of type Clickhouse on localhost, port ``` 8124  ``` (specified in docker-compose.yml), user ``` chuser ``` and password ```chuser_pwd ```  (specified in /etc/clickhouse-server/users.d/chuser.xml and .env) and we start with database ``` default ```.
 
-You should now be able to connect to your locally running Clickhouse docker container. When you are connected, open an SQL terminal and create the database.
+You should now be able to connect to your locally running Clickhouse docker container. When you are connected, open an SQL terminal and create the database. Disconnect and reconnect as this will refresh DBeaver - the new database will not show up on the GUI if you don't do this.
 
 ``` 
 CREATE DATABASE ts_db;
 ```
 
-Now create the demo timeseries table with the following SQL command. This only creates a small table. Once you're sure of the installation, change all the ```toDate(2021``` to ```toDate(2022``` to generate a year and 10 minute's worth of 1 second time series data.
+Now create the demo timeseries table with the following SQL command. This only creates a small table. Once you're sure of the installation, change all the ```toDate(2021``` to ```toDate(2022``` to generate a year and 10 minute's worth of 1 second time series data. Once again, refresh DBeaver.
 
 ```
-CREATE TABLE demo_ts 
+CREATE TABLE ts_db.demo_ts 
 ENGINE = MergeTree
 ORDER BY tuple()
 AS
-SELECT toDateTime(arrayJoin(range(toUInt32(toDateTime('2021-01-01 00:00:00')), toUInt32(toDateTime('2021-01-01 00:10:00')), 1) )) as cdatetime,
-       toSecond(toDateTime(arrayJoin(range(toUInt32(toDateTime('2021-01-01 00:00:00')), toUInt32(toDateTime('2021-01-01 00:10:00')), 1) ))) +
-       toMinute(toDateTime(arrayJoin(range(toUInt32(toDateTime('2021-01-01 00:00:00')), toUInt32(toDateTime('2021-01-01 00:10:00')), 1) ))) +
-       2 * toHour(toDateTime(arrayJoin(range(toUInt32(toDateTime('2021-01-01 00:00:00')), toUInt32(toDateTime('2021-01-01 00:10:00')), 1) ))) +
-       5 * toDayOfWeek(toDateTime(arrayJoin(range(toUInt32(toDateTime('2021-01-01 00:00:00')), toUInt32(toDateTime('2021-01-01 00:10:00')), 1) ))) +
-       8 * toWeek(toDateTime(arrayJoin(range(toUInt32(toDateTime('2021-01-01 00:00:00')), toUInt32(toDateTime('2021-01-01 00:10:00')), 1) ))) +
-       12 * toMonth(toDateTime(arrayJoin(range(toUInt32(toDateTime('2021-01-01 00:00:00')), toUInt32(toDateTime('2021-01-01 00:10:00')), 1) ))) +
-       20 * (toYear(toDateTime(arrayJoin(range(toUInt32(toDateTime('2021-01-01 00:00:00')), toUInt32(toDateTime('2021-01-01 00:10:00')), 1) )))-2021) as ts_values
+SELECT toDateTime(arrayJoin(range(toUInt32(toDateTime('2021-01-01 00:00:00')), toUInt32(toDateTime('2022-01-01 00:10:00')), 1) )) as cdatetime,
+       toSecond(toDateTime(arrayJoin(range(toUInt32(toDateTime('2021-01-01 00:00:00')), toUInt32(toDateTime('2022-01-01 00:10:00')), 1) ))) +
+       toMinute(toDateTime(arrayJoin(range(toUInt32(toDateTime('2021-01-01 00:00:00')), toUInt32(toDateTime('2022-01-01 00:10:00')), 1) ))) +
+       2 * toHour(toDateTime(arrayJoin(range(toUInt32(toDateTime('2021-01-01 00:00:00')), toUInt32(toDateTime('2022-01-01 00:10:00')), 1) ))) +
+       5 * toDayOfWeek(toDateTime(arrayJoin(range(toUInt32(toDateTime('2021-01-01 00:00:00')), toUInt32(toDateTime('2022-01-01 00:10:00')), 1) ))) +
+       8 * toWeek(toDateTime(arrayJoin(range(toUInt32(toDateTime('2021-01-01 00:00:00')), toUInt32(toDateTime('2022-01-01 00:10:00')), 1) ))) +
+       12 * toMonth(toDateTime(arrayJoin(range(toUInt32(toDateTime('2021-01-01 00:00:00')), toUInt32(toDateTime('2022-01-01 00:10:00')), 1) ))) +
+       20 * (toYear(toDateTime(arrayJoin(range(toUInt32(toDateTime('2021-01-01 00:00:00')), toUInt32(toDateTime('2022-01-01 00:10:00')), 1) )))-2021) as ts_values
 ```
 
-Now you can restart the chdemoapp.py app and it should connect to the clickhouse database and show some data.
+Make sure all the packages in ```chdemoapp.py``` have been installed, and then you can start the app and it should connect to the ClickHouse database and show some data.
 
 Note the Dockerfile is unused, but can be used at a later date for deployment as a Docker container, alongside the appropriate service in docker-compose.yml.
+
+### Troubleshooting
+
+```
+ImportError: cannot import name 'load_dotenv' from 'dotenv'
+```
+
+If you get the error message shown above, install the package ```python_dotenv``` instead of ```dotenv```. You do not need to change the import name, as ```dotenv``` will automatically be installed with ```python_dotenv```.
 
 ## Very Initial Draft Example Screenshot of GUI
 

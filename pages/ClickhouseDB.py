@@ -18,7 +18,7 @@ CH_PASSWORD=os.getenv('CH_PASSWORD')
 CH_USER=os.getenv('CH_USER')
 CH_DBNAME=os.getenv('CH_DBNAME')
 
-st.set_page_config(page_title="DB Benchmark")
+st.set_page_config(page_title="ClickhouseDB | DB Bench", page_icon="./icons/pageIcon.png")
 st.markdown("<style>div.row-widget.stRadio > div{flex-direction:row;}</style>", unsafe_allow_html=True) #Shows radio buttons in a row. Streamlit default is vertical list
 
 def get_ch_client():
@@ -89,7 +89,11 @@ def submit_clicked_clickhouse(total_elapsed_time_clickhouse_downsampled, total_e
 
 def clickhouse_data_benchmarking_setup():
     """Displays the layout of the clickhouse widgets in streamlit"""
-    st.subheader("Clickhouse")
+    col1, col2 = st.columns([1,11])
+    with col1:
+        st.image("./icons/clickhouseLogo.png", width=50)
+    with col2:
+        st.markdown("<h3 style='text-align: left;'>ClickhouseDB</h3>", unsafe_allow_html=True)
 
     start_time_date_col, end_time_date_col = st.columns([1, 1]) #Creates columns for the start and end date / time pickers
     with start_time_date_col:
@@ -128,5 +132,6 @@ def clickhouse_data_benchmarking_setup():
                                   clickhouse_out_downsampled_title, clickhouse_out_downsampled, clickhouse_start_datetime, clickhouse_end_datetime, downsampling_value, 
                                   total_ram_usage_clickhouse_raw, total_ram_usage_clickhouse_downsampled)
 
-st.markdown("<h1 style='text-align: center;'>Database Benchmarking</h1>", unsafe_allow_html=True)
+
+### Show Streamlit GUI
 clickhouse_data_benchmarking_setup()

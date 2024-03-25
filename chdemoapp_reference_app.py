@@ -26,7 +26,7 @@ def get_ch_client():
     """
     Create a Clickhouse DB client object (aka connection)
     """
-    client = Client(host=CH_HOST, port=CH_PORT, settings={'use_numpy': True}, user=CH_USER, password=CH_PASSWORD)
+    client = Client(host="localhost", port=9001, settings={'use_numpy': True}, user="chuser", password="chuser_pwd")
     return client
 
 app = Dash(__name__)
@@ -151,6 +151,7 @@ def update_output( std_window, max_nonds, agg_relayout, relayout):
         fig_agg = px.line(df_agg, x='cdatetime', y='ts_values') 
         fig_agg.update_layout(title_text = f"Downsampled Chart ({fig_agg_row_count}/{std_window} of {res_count:,} rows) query time:{elapsed:0.2f}s", title_x=0.5,
                                 xaxis_title='Date and Time', yaxis_title = 'Downsampled Value')
+        return [fig, fig_agg, f"The table has {total_rows:,} rows."]
         
     except Exception as a:
         print(f'update_output error {a}')
@@ -160,7 +161,7 @@ def update_output( std_window, max_nonds, agg_relayout, relayout):
         client.disconnect()
 
     
-    return [fig, fig_agg, f"The table has {total_rows:,} rows."]
+#    return [fig, fig_agg, f"The table has {total_rows:,} rows."]
 
 
 def format_time(input_time):
