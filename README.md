@@ -196,7 +196,7 @@ WITH time_series AS (
 ),
 random_values AS (
     SELECT random() * 100 AS ts_values -- Adjust range as needed
-    FROM generate_series(1, 2) -- Generate 10 random values
+    FROM generate_series(1, 5) -- Generate 5 random values
 )
 INSERT INTO demo_ts (cdatetime, ts_values)
 SELECT time_series.cdatetime, random_values.ts_values

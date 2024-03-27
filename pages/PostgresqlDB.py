@@ -50,7 +50,7 @@ def submit_clicked_postgres(total_elapsed_time_postgres_downsampled, total_elaps
 
         res_list =  pd.read_sql_query(f""" SELECT cdatetime, ts_values FROM demo_ts
                     WHERE cdatetime BETWEEN DATE('{postgresql_start_datetime}') AND DATE('{postgresql_end_datetime}')
-                    ORDER BY cdatetime DESC LIMIT 50000 """, connection)
+                    ORDER BY cdatetime DESC LIMIT 500000 """, connection)
 
         df = pd.DataFrame(res_list, columns =['cdatetime','ts_values'])
         fig = px.line(df, x='cdatetime', y='ts_values')
@@ -76,6 +76,7 @@ def submit_clicked_postgres(total_elapsed_time_postgres_downsampled, total_elaps
             fig_agg_row_count = df_agg.shape[0]
             fig_agg = px.line(df_agg, x='cdatetime', y='ts_values')
             fig_agg.update_layout(xaxis_title='Date and Time', yaxis_title = 'Downsampled Value')
+            fig_agg.update_xaxes(range=[postgresql_start_datetime, postgresql_end_datetime])
             postgres_out_downsampled_title.markdown(f"<h4 style='text-align: left;'>Downsampled Data Chart ({fig_agg_row_count}/{downsampling_value} of {res_count:,} rows)</h4>", unsafe_allow_html=True)
             postgres_out_downsampled.plotly_chart(fig_agg) #Plots a Plotly chart
             data_process_end_time_downsampled = time.time() #Gets the start time before the data is processed
