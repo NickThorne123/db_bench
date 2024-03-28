@@ -113,7 +113,7 @@ def postgresql_data_benchmarking_setup():
     st.write("") #padding
 
     #GUI chart widget placement
-    run_query_submit = st.button("Submit", key="submit_postgres")
+    run_query_submit = st.button("Submit", key="submit_postgresql")
     total_rows_text = st.empty()
     total_disk_usage_postgres = st.empty() #Total disk usage
 
