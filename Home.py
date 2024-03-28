@@ -1,6 +1,6 @@
 import streamlit as st
 from st_pages import Page, Section, add_page_title, show_pages
-
+from PIL import Image
 
 st.set_page_config(
     page_title="Home | DB Bench",
@@ -14,7 +14,8 @@ show_pages(
         Page("Home.py", "Home", ""),
         Page("pages/ClickhouseDB.py", "ClickhouseDB", ""),
         Page("pages/PostgresqlDB.py", "PostgreSQL", ""),
-        Page("pages/TimescaleDB.py", "TimescaleDB", "")
+        Page("pages/TimescaleDB.py", "TimescaleDB", ""),
+        Page("pages/ArcticDB.py", "ArcticDB", "")
     ]
 )
 
@@ -48,6 +49,11 @@ with col3:
 with col4:
     st.markdown("<h3 style='text-align: left;'>TimescaleDB</h3>", unsafe_allow_html=True)
 
+with col3:
+    st.image("./icons/arcticLogo.png", width=45)
+with col4:
+    st.markdown("<h3 style='text-align: left;'>ArcticDB</h3>", unsafe_allow_html=True)
+
 st.write("On each page there is: ")
 st.markdown("- A date and time picker, for the start / end date that the data is plotted")
 st.markdown("- A submit button that when pressed fetches the data for the plot")
@@ -56,10 +62,13 @@ st.markdown("- A downsampling count text entry.")
 
 
 st.write("""
-                On pressing ‘submit’ a timer is started that times how long it takes to fetch the data 
-                (note this will not include the time taken for the charting library to load it). 
-                The elapsed time will be displayed on the dashboard near the line chart. 
+                Further to this, on pressing the ‘submit’ button a timer is started that times how long it takes to fetch the data, 
+                this will not include the time taken for the charting library to load it. 
+                
+                The elapsed time will be displayed on the dashboard near the line chart.
+         
                 Text boxes will be populated showing the space taken up on disk for the table, 
                 and the number of rows in the table. 
+         
                 A text box showing GB of disk storage per million rows will be shown.
                 """)
