@@ -1,4 +1,4 @@
-from datetime import date, datetime as dt
+from datetime import datetime
 from dotenv import load_dotenv
 from clickhouse_driver import Client
 import streamlit as st
@@ -6,7 +6,6 @@ import plotly.express as px
 import datetime
 import pandas as pd
 import time
-import numpy
 import os
 import psutil
 
@@ -23,7 +22,7 @@ st.markdown("<style>div.row-widget.stRadio > div{flex-direction:row;}</style>", 
 
 def get_ch_client():
     """Create a Clickhouse DB client object (aka connection)"""
-    client = Client(host="localhost", port=9001, settings={'use_numpy': True}, user="chuser", password="chuser_pwd") #TODO shouldn't be hard coded
+    client = Client(host=CH_HOST, port=CH_PORT, settings={'use_numpy': True}, user=CH_USER, password=CH_PASSWORD)
     return client
 
 

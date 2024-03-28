@@ -1,15 +1,10 @@
-from datetime import date, datetime as dt
+from datetime import datetime
 from dotenv import load_dotenv
-#from postgresql_driver import Client
 import streamlit as st
-#from streamlit_option_menu import option_menu
-from PIL import Image
 import plotly.express as px
 import datetime
 import pandas as pd
 import time
-import numpy
-import os
 import psutil
 import psycopg2
 
@@ -26,7 +21,7 @@ st.markdown("<style>div.row-widget.stRadio > div{flex-direction:row;}</style>", 
 
 def init_connection():
     connection = psycopg2.connect(database=DATABASE, user=USER, password=PASSWORD, host=HOST, port=PORT)
-    return connection 
+    return connection
 
 
 def submit_clicked_postgres(total_elapsed_time_postgres_downsampled, total_elapsed_time_postgres_raw, downsampling_on_off, postgres_out_raw_title, postgres_out, 
@@ -36,8 +31,8 @@ def submit_clicked_postgres(total_elapsed_time_postgres_downsampled, total_elaps
     try:
         connection = init_connection()
 
-        total_rows =  pd.read_sql_query('SELECT count(*) FROM demo_ts', connection)
-        total_rows_text.text(f"Total Rows in Clickhouse Table: {total_rows.iloc[0]['count']:,}")
+        total_rows = pd.read_sql_query('SELECT count(*) FROM demo_ts', connection)
+        total_rows_text.text(f"Total Rows in Postgres Table: {total_rows.iloc[0]['count']:,}")
 
         data_process_start_time_raw = time.time() #Gets the start time before the data is processed
         #Get postgres table size
