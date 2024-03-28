@@ -28,7 +28,7 @@ def get_ch_client():
 
 
 def submit_clicked_clickhouse(total_elapsed_time_clickhouse_downsampled, total_elapsed_time_clickhouse_raw, downsampling_on_off, clickhouse_out_raw_title, clickhouse_out,
-                               clickhouse_out_downsampled_title, clickhouse_out_downsampled, clickhouse_start_datetime, clickhouse_end_datetime, downsampling_value, 
+                               clickhouse_out_downsampled_title, clickhouse_out_downsampled, clickhouse_start_datetime, clickhouse_end_datetime, downsampling_value,
                                total_ram_usage_clickhouse_raw, total_disk_usage_clickhouse, total_rows_text):
     """Performs the logic to get the data from the clickhouse DB and outputs it onto streamlit when submit is clicked"""
     client = get_ch_client()
@@ -39,31 +39,31 @@ def submit_clicked_clickhouse(total_elapsed_time_clickhouse_downsampled, total_e
         total_rows_query =  f""" SELECT count(*) FROM ts_db.demo_ts  """
         total_rows = client.execute(total_rows_query, settings={'use_numpy': True})[0][0]
 
-        total_rows_text.text(f"Total Rows in Clickhouse Table: {total_rows:,}", key="total_rows_clickhouse")
+        total_rows_text.text(f"Total Rows in Clickhouse Table: {total_rows:,}")
 
         #Get clickhouse table size _ Int = 4 bytes and Datetime = 4 bytes in Clickhouse
         #NOTE if an SQL command to check the table size can be found then use that instead but this should be accurate
         total_table_size = round(((total_rows * 8) / 1024 ** 2), 2)
         if total_table_size >= 1024: #If size is over 1024MB, divide by 1024 and show as GB
-            total_disk_usage_clickhouse.text(f"Total Disk Usage for Clickhouse Table: {total_table_size / 1024}GB", key="disk_usage_clickhouse")
+            total_disk_usage_clickhouse.text(f"Total Disk Usage for Clickhouse Table: {total_table_size / 1024}GB")
         else:
-            total_disk_usage_clickhouse.text(f"Total Disk Usage for Clickhouse Table: {total_table_size}MB", key="disk_usage_clickhouse")
+            total_disk_usage_clickhouse.text(f"Total Disk Usage for Clickhouse Table: {total_table_size}MB")
 
         res_count_query =  f""" SELECT count(*) FROM ts_db.demo_ts WHERE cdatetime BETWEEN toDateTime('{clickhouse_start_datetime}') AND toDateTime('{clickhouse_end_datetime}') """
         res_count = client.execute(res_count_query, settings={'use_numpy': True})[0][0]
 
         memory_usage_pre_raw = process.memory_info().rss / 1024 ** 2 #Gets the amount of RAM used before the process is being run in MB
+        data_process_start_time_raw = time.time() #Gets the start time before the data is processed
         res_list_query =  f""" SELECT cdatetime, ts_values FROM ts_db.demo_ts 
                     WHERE cdatetime BETWEEN toDateTime('{clickhouse_start_datetime}') AND toDateTime('{clickhouse_end_datetime}')
-                    ORDER BY cdatetime DESC LIMIT 500000 """
+                    ORDER BY cdatetime DESC LIMIT 50000 """
         res_list = client.execute(res_list_query, settings={'use_numpy': True})
 
-        data_process_start_time_raw = time.time() #Gets the start time before the data is processed
         df = pd.DataFrame(res_list, columns =['cdatetime','ts_values'])
         fig = px.line(df, x='cdatetime', y='ts_values')
         fig.update_layout(xaxis_title='Date and Time', yaxis_title = 'Raw Value')
         fig.update_xaxes(range=[clickhouse_start_datetime, clickhouse_end_datetime]) # Don't let chart autoscale as loses impact of how few samples we're pulling compared to downsampled
-        clickhouse_out_raw_title.markdown("<h4 style='text-align: left;'>Raw Data Chart of 500,000 samples</h4>", unsafe_allow_html=True)
+        clickhouse_out_raw_title.markdown("<h4 style='text-align: left;'>Raw Data Chart of 50,000 samples</h4>", unsafe_allow_html=True)
         clickhouse_out.plotly_chart(fig) #Plots a Plotly chart
 
         data_process_end_time_raw = time.time() #Gets the end time after data processing is complete
@@ -76,14 +76,14 @@ def submit_clicked_clickhouse(total_elapsed_time_clickhouse_downsampled, total_e
             data_process_start_time_downsampled = time.time() #Gets the start time before the data is processed
 
             #Shows downsampled values
-            downsample_query = f""" FROM ts_db.demo_ts select untuple(arrayJoin(largestTriangleThreeBuckets({downsampling_value})(cdatetime, ts_values )))
-                        where toDateTime(cdatetime) >= toDateTime('{clickhouse_start_datetime}') and toDateTime(cdatetime) <= toDateTime('{clickhouse_end_datetime}') """
+            downsample_query = f""" FROM ts_db.demo_ts SELECT untuple(arrayJoin(largestTriangleThreeBuckets({downsampling_value})(cdatetime, ts_values)))
+                        WHERE toDateTime(cdatetime) >= toDateTime('{clickhouse_start_datetime}') and toDateTime(cdatetime) <= toDateTime('{clickhouse_end_datetime}') """
             res_list_agg = client.execute(downsample_query, settings={'use_numpy': True})
             df_agg = pd.DataFrame(res_list_agg, columns =['cdatetime','ts_values'])
             fig_agg_row_count = df_agg.shape[0]
             fig_agg = px.line(df_agg, x='cdatetime', y='ts_values')
             fig_agg.update_layout(xaxis_title='Date and Time', yaxis_title = 'Downsampled Value')
-            clickhouse_out_downsampled_title.markdown(f"<h4 style='text-align: left;'>Downsampled Data Chart ({fig_agg_row_count}/{downsampling_value} of {res_count:,} rows)</h4>", unsafe_allow_html=True)#(f"Downsampled Data Chart ({fig_agg_row_count}/{downsampling_value} of {res_count:,} rows)")
+            clickhouse_out_downsampled_title.markdown(f"<h4 style='text-align: left;'>Downsampled Data Chart ({fig_agg_row_count}/{downsampling_value} of {res_count:,} rows)</h4>", unsafe_allow_html=True)
             clickhouse_out_downsampled.plotly_chart(fig_agg) #Plots a Plotly chart
 
             data_process_end_time_downsampled = time.time() #Gets the start time before the data is processed

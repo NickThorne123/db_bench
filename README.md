@@ -169,7 +169,7 @@ SELECT toDateTime(arrayJoin(range(toUInt32(toDateTime('2021-01-01 00:00:00')), t
        20 * (toYear(toDateTime(arrayJoin(range(toUInt32(toDateTime('2021-01-01 00:00:00')), toUInt32(toDateTime('2022-01-01 00:10:00')), 1) )))-2021) as ts_values
 ```
 
-Make sure all the packages in ```chdemoapp.py``` have been installed, and then you can start the app and it should connect to the ClickHouse database and show some data.
+Make sure all the packages in ```chdemoapp.py``` have been installed, and then you can start the app and it should connect to the ClickHouse database and show some data. This can now also be done with the ```db_bench.py``` application.
 
 ## Configuring PostgreSQL
 
@@ -196,12 +196,21 @@ WITH time_series AS (
 ),
 random_values AS (
     SELECT random() * 100 AS ts_values -- Adjust range as needed
-    FROM generate_series(1, 10) -- Generate 10 random values
+    FROM generate_series(1, 5) -- Generate 5 random values
 )
 INSERT INTO demo_ts (cdatetime, ts_values)
 SELECT time_series.cdatetime, random_values.ts_values
 FROM time_series
 CROSS JOIN random_values;
+```
+
+Lastly, in order to display the data on the Streamlit app, navigate to your ```.streamlit``` folder (default is at ```C:\Users\Username\.streamlit```) and create a ```secrets.toml``` file. Add the following code:
+
+```
+CREATE TABLE demo_ts (
+   cdatetime DATE,
+   ts_values INTEGER
+);
 ```
 
 Note the Dockerfile is unused, but can be used at a later date for deployment as a Docker container, alongside the appropriate service in docker-compose.yml.
