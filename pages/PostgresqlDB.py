@@ -9,7 +9,7 @@ import time
 import psutil
 import psycopg2
 
-load_dotenv()
+load_dotenv(override=True)
 
 HOST=os.getenv('POSTGRES_HOST')
 PORT = os.getenv('POSTGRES_PORT')
@@ -46,13 +46,13 @@ def submit_clicked_postgres(total_elapsed_time_postgres_downsampled, total_elaps
 
         res_list =  pd.read_sql_query(f""" SELECT cdatetime, ts_values FROM demo_ts
                     WHERE cdatetime BETWEEN DATE('{postgresql_start_datetime}') AND DATE('{postgresql_end_datetime}')
-                    ORDER BY cdatetime DESC LIMIT 500000 """, connection)
+                    ORDER BY cdatetime DESC LIMIT 50000 """, connection)
 
         df = pd.DataFrame(res_list, columns =['cdatetime','ts_values'])
         fig = px.line(df, x='cdatetime', y='ts_values')
         fig.update_layout(xaxis_title='Date and Time', yaxis_title = 'Raw Value')
         fig.update_xaxes(range=[postgresql_start_datetime, postgresql_end_datetime]) # Don't let chart autoscale as loses impact of how few samples we're pulling compared to downsampled
-        postgres_out_raw_title.markdown("<h4 style='text-align: left;'>Raw Data Chart of 500,000 samples</h4>", unsafe_allow_html=True)
+        postgres_out_raw_title.markdown("<h4 style='text-align: left;'>Raw Data Chart of 50,000 samples</h4>", unsafe_allow_html=True)
         postgres_out.plotly_chart(fig) # Plots a Plotly chart
 
         data_process_end_time_raw = time.time() #Gets the end time after data processing is complete
@@ -124,7 +124,10 @@ def postgresql_data_benchmarking_setup():
     postgres_out_downsampled = st.empty()
 
     if run_query_submit:
-        submit_clicked_postgres(total_elapsed_time_postgres_downsampled, total_elapsed_time_postgres_raw, downsampling_on_off, postgres_out_raw_title, postgres_out,
+        if postgresql_start_datetime > postgresql_end_datetime:
+            st.error("Start date / time cannot be after end date / time")
+        else:
+            submit_clicked_postgres(total_elapsed_time_postgres_downsampled, total_elapsed_time_postgres_raw, downsampling_on_off, postgres_out_raw_title, postgres_out,
                                   postgres_out_downsampled_title, postgres_out_downsampled, postgresql_start_datetime, postgresql_end_datetime, downsampling_value,
                                   total_ram_usage_postgres_raw, total_rows_text, total_disk_usage_postgres)
 

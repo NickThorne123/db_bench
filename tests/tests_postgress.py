@@ -120,7 +120,7 @@ def test_19_increment_downsample_value_timescaledb():
     at.number_input(key="downsample_value_timescaledb").increment().run()
     assert at.number_input(key="downsample_value_timescaledb").value == 6
 
-def test_20_set_downsample_value_timescaledb(): #TODO finish
+def test_20_set_downsample_value_timescaledb():
     """A test to increment the downsample number input"""
     at = AppTest.from_file("pages/TimescaleDB.py").run()
     at.toggle(key="downsample_toggle_timescaledb").set_value(1).run()
@@ -156,8 +156,57 @@ def test_25_submit_timescaledb():
         at = AppTest.from_file("pages/TimescaleDB.py").run()
         assert at.button(key="submit_timescaledb").click().run()
 
+def test_26_downsample_arcticdb_enable():
+    """A test to check whether the downsample toggle can be clicked to enable it"""
+    at = AppTest.from_file("pages/ArcticDB.py").run()
+    assert at.toggle(key="downsample_toggle_arcticdb").run()
+
+def test_27_increment_downsample_value_arcticdb():
+    """A test to increment the downsample number input"""
+    at = AppTest.from_file("pages/ArcticDB.py").run()
+    at.toggle(key="downsample_toggle_arcticdb").set_value(1).run()
+    at.number_input(key="downsample_value_arcticdb").increment().run()
+    assert at.number_input(key="downsample_value_arcticdb").value == 6
+
+def test_28_set_downsample_value_arcticdb():
+    """A test to increment the downsample number input"""
+    at = AppTest.from_file("pages/ArcticDB.py").run()
+    at.toggle(key="downsample_toggle_arcticdb").set_value(1).run()
+    at.number_input(key="downsample_value_arcticdb").set_value(5000).run()
+    assert at.number_input(key="downsample_value_arcticdb").value == 5000
+        
+def test_29_set_start_date_value_arcticdb():
+        """A test to set the arcticdb start date"""
+        at = AppTest.from_file("pages/ArcticDB.py").run()
+        at.date_input(key="start_date_arcticdb").set_value(dt.date(2024, 1, 1)).run()
+        assert at.date_input(key="start_date_arcticdb").value == dt.date(2024, 1, 1)
+
+def test_30_set_end_date_value_arcticdb():
+        """A test to set the arcticdb end date"""
+        at = AppTest.from_file("pages/ArcticDB.py").run()
+        at.date_input(key="end_date_arcticdb").set_value(dt.date(2019, 6, 6)).run()
+        assert at.date_input(key="end_date_arcticdb").value == dt.date(2019, 6, 6)
+
+def test_31_set_start_time_value_arcticdb():
+        """A test to set the arcticdb start time"""
+        at = AppTest.from_file("pages/ArcticDB.py").run()
+        at.time_input(key="start_time_arcticdb").set_value(dt.time(13, 50))
+        assert at.time_input(key="start_time_arcticdb").value == (dt.time(13, 50))
+
+def test_32_set_end_time_value_arcticdb():
+        """A test to set the arcticdb end time"""
+        at = AppTest.from_file("pages/ArcticDB.py").run()
+        at.time_input(key="end_time_arcticdb").set_value(dt.time(7, 30))
+        assert at.time_input(key="end_time_arcticdb").value == (dt.time(7, 30))
+
 @pytest.mark.xfail(reason=("Times out after 3 seconds due to data being imported"))
-def test_26_edit_all_values_clickhouse():
+def test_33_submit_arcticdb():
+        """A test to click the submit button and start collecting timescaledb data"""
+        at = AppTest.from_file("pages/ArcticDB.py").run()
+        assert at.button(key="submit_arcticdb").click().run()
+
+@pytest.mark.xfail(reason=("Times out after 3 seconds due to data being imported"))
+def test_34_edit_all_values_clickhouse():
         """A test to change all the controlable values for the chosen DB then check they are the same when Submit button selected"""
         at = AppTest.from_file("pages/ClickhouseDB.py").run()
         at.toggle(key="downsample_toggle_clickhouse").set_value(1).run()
@@ -175,7 +224,7 @@ def test_26_edit_all_values_clickhouse():
                assert False
 
 @pytest.mark.xfail(reason=("Times out after 3 seconds due to data being imported"))
-def test_27_edit_all_values_postgresql():
+def test_35_edit_all_values_postgresql():
         """A test to change all the controlable values for the chosen DB then check they are the same when Submit button selected"""
         at = AppTest.from_file("pages/PostgresqlDB.py").run()
         at.toggle(key="downsample_toggle_postgresql").set_value(1).run()
@@ -192,7 +241,7 @@ def test_27_edit_all_values_postgresql():
         else:
                 assert False
 
-def test_28_edit_all_values_timescaledb():
+def test_36_edit_all_values_timescaledb():
         """A test to change all the controlable values for the chosen DB then check they are the same when Submit button selected"""
         at = AppTest.from_file("pages/TimescaleDB.py").run()
         at.toggle(key="downsample_toggle_timescaledb").set_value(1).run()
@@ -208,3 +257,22 @@ def test_28_edit_all_values_timescaledb():
                 assert True
         else:
                 assert False
+
+@pytest.mark.xfail(reason=("Times out after 3 seconds due to data being imported"))
+def test_37_edit_all_values_arcticdb():
+        """A test to change all the controlable values for the chosen DB then check they are the same when Submit button selected"""
+        at = AppTest.from_file("pages/ArcticDB.py").run()
+        at.toggle(key="downsample_toggle_arcticdb").set_value(1).run()
+        at.number_input(key="downsample_value_arcticdb").set_value(5000).run()
+        at.date_input(key="start_date_arcticdb").set_value(dt.date(2021, 9, 8)).run()
+        at.date_input(key="end_date_arcticdb").set_value(dt.date(2022, 6, 6)).run()
+        at.time_input(key="start_time_arcticdb").set_value(dt.time(11, 35))
+        at.time_input(key="end_time_arcticdb").set_value(dt.time(14, 00))
+        at.button(key="submit_arcticdb").click().run()
+
+        if at.number_input(key="downsample_value_arcticdb").value == 5000 and at.date_input(key="start_date_arcticdb").value == dt.date(2021, 9, 8) and at.date_input(key="end_date_arcticdb").value == dt.date(2022, 6, 6) \
+                and at.time_input(key="start_time_arcticdb").value == (dt.time(11, 35)) and at.time_input(key="end_time_arcticdb").value == (dt.time(14, 00)):
+                assert True
+        else:
+                assert False
+

@@ -9,7 +9,7 @@ import time
 import os
 import psutil
 
-load_dotenv()
+load_dotenv(override=True)
 
 CH_HOST=os.getenv('CH_HOST')
 CH_PORT=os.getenv('CH_PORT')
@@ -55,14 +55,14 @@ def submit_clicked_clickhouse(total_elapsed_time_clickhouse_downsampled, total_e
         data_process_start_time_raw = time.time() #Gets the start time before the data is processed
         res_list_query =  f""" SELECT cdatetime, ts_values FROM ts_db.demo_ts 
                     WHERE cdatetime BETWEEN toDateTime('{clickhouse_start_datetime}') AND toDateTime('{clickhouse_end_datetime}')
-                    ORDER BY cdatetime DESC LIMIT 500000 """
+                    ORDER BY cdatetime DESC LIMIT 50000 """
         res_list = client.execute(res_list_query, settings={'use_numpy': True})
 
         df = pd.DataFrame(res_list, columns =['cdatetime','ts_values'])
         fig = px.line(df, x='cdatetime', y='ts_values')
         fig.update_layout(xaxis_title='Date and Time', yaxis_title = 'Raw Value')
         fig.update_xaxes(range=[clickhouse_start_datetime, clickhouse_end_datetime]) # Don't let chart autoscale as loses impact of how few samples we're pulling compared to downsampled
-        clickhouse_out_raw_title.markdown("<h4 style='text-align: left;'>Raw Data Chart of 500,000 samples</h4>", unsafe_allow_html=True)
+        clickhouse_out_raw_title.markdown("<h4 style='text-align: left;'>Raw Data Chart of 50,000 samples</h4>", unsafe_allow_html=True)
         clickhouse_out.plotly_chart(fig) #Plots a Plotly chart
 
         data_process_end_time_raw = time.time() #Gets the end time after data processing is complete
@@ -136,9 +136,12 @@ def clickhouse_data_benchmarking_setup():
     clickhouse_out_downsampled = st.empty()
 
     if run_query_submit:
-        submit_clicked_clickhouse(total_elapsed_time_clickhouse_downsampled, total_elapsed_time_clickhouse_raw, downsampling_on_off, clickhouse_out_raw_title, clickhouse_out, 
-                                  clickhouse_out_downsampled_title, clickhouse_out_downsampled, clickhouse_start_datetime, clickhouse_end_datetime, downsampling_value, 
-                                  total_ram_usage_clickhouse_raw, total_disk_usage_clickhouse, total_rows_text)
+        if clickhouse_start_datetime > clickhouse_end_datetime:
+            st.error("Start date / time cannot be after end date / time")
+        else:
+            submit_clicked_clickhouse(total_elapsed_time_clickhouse_downsampled, total_elapsed_time_clickhouse_raw, downsampling_on_off, clickhouse_out_raw_title, clickhouse_out, 
+                                    clickhouse_out_downsampled_title, clickhouse_out_downsampled, clickhouse_start_datetime, clickhouse_end_datetime, downsampling_value, 
+                                    total_ram_usage_clickhouse_raw, total_disk_usage_clickhouse, total_rows_text)
 
 
 ### Show Streamlit GUI

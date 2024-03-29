@@ -225,9 +225,9 @@ Once connected, create a table with the SQL command
 
 To first install ArcticDB locally, run the command ```pip install arcticdb```.
 
-Create an Amazon AWS Account and set up an S3 bucket. Within the .env file, add the URL for the S3 bucket ```'s3s://s3.eu-west-2.amazonaws.com:<bucket_name>?aws_auth=true'```
+Create an Amazon AWS Account and set up an S3 bucket. Within the project .env file, add the URL for the S3 bucket ```'s3s://s3.eu-west-2.amazonaws.com:<bucket_name>?aws_auth=true'``` to ARCTIC_URL.
 
-Run the ```arcticdb_setup.py``` file by running ```python .\arcticdb_setup.py``` from the root folder. (This may take some time)
+Run the ```arcticdb_setup.py``` file by running ```python .\arcticdb_setup.py``` from the root folder (This may take some time). This sends the same dataset from the Clickhouse database to the Arctic storage.
 
 ### Troubleshooting
 
