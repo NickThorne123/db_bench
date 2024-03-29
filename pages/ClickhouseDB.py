@@ -55,14 +55,14 @@ def submit_clicked_clickhouse(total_elapsed_time_clickhouse_downsampled, total_e
         data_process_start_time_raw = time.time() #Gets the start time before the data is processed
         res_list_query =  f""" SELECT cdatetime, ts_values FROM ts_db.demo_ts 
                     WHERE cdatetime BETWEEN toDateTime('{clickhouse_start_datetime}') AND toDateTime('{clickhouse_end_datetime}')
-                    ORDER BY cdatetime DESC LIMIT 50000 """
+                    ORDER BY cdatetime DESC LIMIT 500000 """
         res_list = client.execute(res_list_query, settings={'use_numpy': True})
 
         df = pd.DataFrame(res_list, columns =['cdatetime','ts_values'])
         fig = px.line(df, x='cdatetime', y='ts_values')
         fig.update_layout(xaxis_title='Date and Time', yaxis_title = 'Raw Value')
         fig.update_xaxes(range=[clickhouse_start_datetime, clickhouse_end_datetime]) # Don't let chart autoscale as loses impact of how few samples we're pulling compared to downsampled
-        clickhouse_out_raw_title.markdown("<h4 style='text-align: left;'>Raw Data Chart of 50,000 samples</h4>", unsafe_allow_html=True)
+        clickhouse_out_raw_title.markdown("<h4 style='text-align: left;'>Raw Data Chart of 500,000 samples</h4>", unsafe_allow_html=True)
         clickhouse_out.plotly_chart(fig) #Plots a Plotly chart
 
         data_process_end_time_raw = time.time() #Gets the end time after data processing is complete
@@ -78,7 +78,7 @@ def submit_clicked_clickhouse(total_elapsed_time_clickhouse_downsampled, total_e
             downsample_query = f""" FROM ts_db.demo_ts SELECT untuple(arrayJoin(largestTriangleThreeBuckets({downsampling_value})(cdatetime, ts_values)))
                         WHERE toDateTime(cdatetime) >= toDateTime('{clickhouse_start_datetime}') and toDateTime(cdatetime) <= toDateTime('{clickhouse_end_datetime}') """
             res_list_agg = client.execute(downsample_query, settings={'use_numpy': True})
-            df_agg = pd.DataFrame(res_list_agg, columns =['cdatetime','ts_values'])
+            df_agg = pd.DataFrame(res_list_agg, columns=['cdatetime','ts_values'])
             fig_agg_row_count = df_agg.shape[0]
             fig_agg = px.line(df_agg, x='cdatetime', y='ts_values')
             fig_agg.update_layout(xaxis_title='Date and Time', yaxis_title = 'Downsampled Value')

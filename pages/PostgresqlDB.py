@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import streamlit as st
 import plotly.express as px
 import datetime
+import os
 import pandas as pd
 import time
 import psutil
@@ -10,11 +11,11 @@ import psycopg2
 
 load_dotenv()
 
-HOST="localhost"
-PORT = 5432
-DATABASE="postgres"
-USER="postgres"
-PASSWORD="postgres"
+HOST=os.getenv('POSTGRES_HOST')
+PORT = os.getenv('POSTGRES_PORT')
+DATABASE=os.getenv('POSTGRES_DATABASE')
+USER=os.getenv('POSTGRES_USER')
+PASSWORD=os.getenv('POSTGRES_PASSWORD')
 
 st.set_page_config(page_title="PostgreSQL | DB Bench", page_icon="./icons/pageIcon.png")
 st.markdown("<style>div.row-widget.stRadio > div{flex-direction:row;}</style>", unsafe_allow_html=True) #Shows radio buttons in a row. Streamlit default is vertical list
@@ -51,7 +52,7 @@ def submit_clicked_postgres(total_elapsed_time_postgres_downsampled, total_elaps
         fig = px.line(df, x='cdatetime', y='ts_values')
         fig.update_layout(xaxis_title='Date and Time', yaxis_title = 'Raw Value')
         fig.update_xaxes(range=[postgresql_start_datetime, postgresql_end_datetime]) # Don't let chart autoscale as loses impact of how few samples we're pulling compared to downsampled
-        postgres_out_raw_title.markdown("<h4 style='text-align: left;'>Raw Data Chart of 50,000 samples</h4>", unsafe_allow_html=True)
+        postgres_out_raw_title.markdown("<h4 style='text-align: left;'>Raw Data Chart of 500,000 samples</h4>", unsafe_allow_html=True)
         postgres_out.plotly_chart(fig) # Plots a Plotly chart
 
         data_process_end_time_raw = time.time() #Gets the end time after data processing is complete

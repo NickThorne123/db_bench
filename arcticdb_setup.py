@@ -4,6 +4,8 @@ from clickhouse_driver import Client
 from pandas import DataFrame
 from dotenv import load_dotenv
 
+load_dotenv()
+
 ARCTIC_URL=os.getenv('ARCTIC_URL')
 CH_HOST=os.getenv('CH_HOST')
 CH_PORT=os.getenv('CH_PORT')
@@ -11,7 +13,6 @@ CH_PASSWORD=os.getenv('CH_PASSWORD')
 CH_USER=os.getenv('CH_USER')
 CH_DBNAME=os.getenv('CH_DBNAME')
 
-load_dotenv()
 client = Client(host=CH_HOST, port=CH_PORT, settings={'use_numpy': True}, user=CH_USER, password=CH_PASSWORD)
 
 try:
@@ -27,4 +28,4 @@ try:
     print("Data successfully sent to S3 Bucket!")
 
 except Exception:
-    print("Something went wrong!")
+    print("Something went wrong! Make sure the Clickhouse DB server is running and check the public facing permissions in AWS")
