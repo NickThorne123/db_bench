@@ -1,32 +1,28 @@
-from datetime import date, datetime as dt
+from datetime import datetime
 from dotenv import load_dotenv
-#from postgresql_driver import Client
 import streamlit as st
-#from streamlit_option_menu import option_menu
-from PIL import Image
 import plotly.express as px
 import datetime
+import os
 import pandas as pd
 import time
-import numpy
-import os
 import psutil
 import psycopg2
 
-load_dotenv()
+load_dotenv(override=True)
 
-HOST="localhost"
-PORT = 5432
-DATABASE="postgres"
-USER="postgres"
-PASSWORD="postgres"
+HOST=os.getenv('POSTGRES_HOST')
+PORT = os.getenv('POSTGRES_PORT')
+DATABASE=os.getenv('POSTGRES_DATABASE')
+USER=os.getenv('POSTGRES_USER')
+PASSWORD=os.getenv('POSTGRES_PASSWORD')
 
 st.set_page_config(page_title="PostgreSQL | DB Bench", page_icon="./icons/pageIcon.png")
 st.markdown("<style>div.row-widget.stRadio > div{flex-direction:row;}</style>", unsafe_allow_html=True) #Shows radio buttons in a row. Streamlit default is vertical list
 
 def init_connection():
     connection = psycopg2.connect(database=DATABASE, user=USER, password=PASSWORD, host=HOST, port=PORT)
-    return connection 
+    return connection
 
 
 def submit_clicked_postgres(total_elapsed_time_postgres_downsampled, total_elapsed_time_postgres_raw, downsampling_on_off, postgres_out_raw_title, postgres_out, 
@@ -36,8 +32,8 @@ def submit_clicked_postgres(total_elapsed_time_postgres_downsampled, total_elaps
     try:
         connection = init_connection()
 
-        total_rows =  pd.read_sql_query('SELECT count(*) FROM demo_ts', connection)
-        total_rows_text.text(f"Total Rows in Clickhouse Table: {total_rows.iloc[0]['count']:,}")
+        total_rows = pd.read_sql_query('SELECT count(*) FROM demo_ts', connection)
+        total_rows_text.text(f"Total Rows in Postgres Table: {total_rows.iloc[0]['count']:,}")
 
         data_process_start_time_raw = time.time() #Gets the start time before the data is processed
         #Get postgres table size
@@ -50,7 +46,7 @@ def submit_clicked_postgres(total_elapsed_time_postgres_downsampled, total_elaps
 
         res_list =  pd.read_sql_query(f""" SELECT cdatetime, ts_values FROM demo_ts
                     WHERE cdatetime BETWEEN DATE('{postgresql_start_datetime}') AND DATE('{postgresql_end_datetime}')
-                    ORDER BY cdatetime DESC LIMIT 500000 """, connection)
+                    ORDER BY cdatetime DESC LIMIT 50000 """, connection)
 
         df = pd.DataFrame(res_list, columns =['cdatetime','ts_values'])
         fig = px.line(df, x='cdatetime', y='ts_values')
@@ -128,7 +124,10 @@ def postgresql_data_benchmarking_setup():
     postgres_out_downsampled = st.empty()
 
     if run_query_submit:
-        submit_clicked_postgres(total_elapsed_time_postgres_downsampled, total_elapsed_time_postgres_raw, downsampling_on_off, postgres_out_raw_title, postgres_out,
+        if postgresql_start_datetime > postgresql_end_datetime:
+            st.error("Start date / time cannot be after end date / time")
+        else:
+            submit_clicked_postgres(total_elapsed_time_postgres_downsampled, total_elapsed_time_postgres_raw, downsampling_on_off, postgres_out_raw_title, postgres_out,
                                   postgres_out_downsampled_title, postgres_out_downsampled, postgresql_start_datetime, postgresql_end_datetime, downsampling_value,
                                   total_ram_usage_postgres_raw, total_rows_text, total_disk_usage_postgres)
 

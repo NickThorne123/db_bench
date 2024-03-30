@@ -12,6 +12,8 @@ import numpy
 import os
 import psutil
 
+load_dotenv(override=True)
+
 CH_HOST=os.getenv('CH_HOST')
 CH_PORT=os.getenv('CH_PORT')
 CH_PASSWORD=os.getenv('CH_PASSWORD')
@@ -64,7 +66,10 @@ def timescaledb_data_benchmarking_setup():
     timescaledb_out_downsampled = st.empty()
 
     # if run_query_submit:
-    #     submit_clicked_timescaledb(total_elapsed_time_timescaledb_downsampled, total_elapsed_time_timescaledb_raw, downsampling_on_off, timescaledb_out_raw_title, timescaledb_out, 
+        # if timescaledb_start_datetime > timescaledb_end_datetime:
+        #     st.error("Start date / time cannot be after end date / time")
+        # else:
+    #       submit_clicked_timescaledb(total_elapsed_time_timescaledb_downsampled, total_elapsed_time_timescaledb_raw, downsampling_on_off, timescaledb_out_raw_title, timescaledb_out, 
     #                               timescaledb_out_downsampled_title, timescaledb_out_downsampled, timescaledb_start_datetime, timescaledb_end_datetime, downsampling_value, 
     #                               total_ram_usage_timescaledb_raw, total_disk_usage_timescaledb, total_rows_text)
 ### Show Streamlit GUI

@@ -1,4 +1,4 @@
-from datetime import date, datetime as dt
+from datetime import datetime
 from dotenv import load_dotenv
 from clickhouse_driver import Client
 import streamlit as st
@@ -6,11 +6,10 @@ import plotly.express as px
 import datetime
 import pandas as pd
 import time
-import numpy
 import os
 import psutil
 
-load_dotenv()
+load_dotenv(override=True)
 
 CH_HOST=os.getenv('CH_HOST')
 CH_PORT=os.getenv('CH_PORT')
@@ -23,7 +22,7 @@ st.markdown("<style>div.row-widget.stRadio > div{flex-direction:row;}</style>", 
 
 def get_ch_client():
     """Create a Clickhouse DB client object (aka connection)"""
-    client = Client(host="localhost", port=9001, settings={'use_numpy': True}, user="chuser", password="chuser_pwd") #TODO shouldn't be hard coded
+    client = Client(host=CH_HOST, port=CH_PORT, settings={'use_numpy': True}, user=CH_USER, password=CH_PASSWORD)
     return client
 
 
@@ -79,7 +78,7 @@ def submit_clicked_clickhouse(total_elapsed_time_clickhouse_downsampled, total_e
             downsample_query = f""" FROM ts_db.demo_ts SELECT untuple(arrayJoin(largestTriangleThreeBuckets({downsampling_value})(cdatetime, ts_values)))
                         WHERE toDateTime(cdatetime) >= toDateTime('{clickhouse_start_datetime}') and toDateTime(cdatetime) <= toDateTime('{clickhouse_end_datetime}') """
             res_list_agg = client.execute(downsample_query, settings={'use_numpy': True})
-            df_agg = pd.DataFrame(res_list_agg, columns =['cdatetime','ts_values'])
+            df_agg = pd.DataFrame(res_list_agg, columns=['cdatetime','ts_values'])
             fig_agg_row_count = df_agg.shape[0]
             fig_agg = px.line(df_agg, x='cdatetime', y='ts_values')
             fig_agg.update_layout(xaxis_title='Date and Time', yaxis_title = 'Downsampled Value')
@@ -137,9 +136,12 @@ def clickhouse_data_benchmarking_setup():
     clickhouse_out_downsampled = st.empty()
 
     if run_query_submit:
-        submit_clicked_clickhouse(total_elapsed_time_clickhouse_downsampled, total_elapsed_time_clickhouse_raw, downsampling_on_off, clickhouse_out_raw_title, clickhouse_out, 
-                                  clickhouse_out_downsampled_title, clickhouse_out_downsampled, clickhouse_start_datetime, clickhouse_end_datetime, downsampling_value, 
-                                  total_ram_usage_clickhouse_raw, total_disk_usage_clickhouse, total_rows_text)
+        if clickhouse_start_datetime > clickhouse_end_datetime:
+            st.error("Start date / time cannot be after end date / time")
+        else:
+            submit_clicked_clickhouse(total_elapsed_time_clickhouse_downsampled, total_elapsed_time_clickhouse_raw, downsampling_on_off, clickhouse_out_raw_title, clickhouse_out, 
+                                    clickhouse_out_downsampled_title, clickhouse_out_downsampled, clickhouse_start_datetime, clickhouse_end_datetime, downsampling_value, 
+                                    total_ram_usage_clickhouse_raw, total_disk_usage_clickhouse, total_rows_text)
 
 
 ### Show Streamlit GUI

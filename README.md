@@ -215,6 +215,20 @@ CREATE TABLE demo_ts (
 
 Note the Dockerfile is unused, but can be used at a later date for deployment as a Docker container, alongside the appropriate service in docker-compose.yml.
 
+This will create the ```psql_db``` container. Go to DBeaver and create a new connection to a Postgres database on port 5432 with the username ```postgres``` and password ```postgres```.
+
+Once connected, create a table with the SQL command
+
+## Configuring ArcticDB
+
+#### Make sure Clickhouse DB is set up before configuring the ArcticDB database
+
+To first install ArcticDB locally, run the command ```pip install arcticdb```.
+
+Create an Amazon AWS Account and set up an S3 bucket. Within the project .env file, add the URL for the S3 bucket ```'s3s://s3.eu-west-2.amazonaws.com:<bucket_name>?aws_auth=true'``` to ARCTIC_URL.
+
+Run the ```arcticdb_setup.py``` file by running ```python .\arcticdb_setup.py``` from the root folder (This may take some time). This sends the same dataset from the Clickhouse database to the Arctic storage.
+
 ### Troubleshooting
 
 ```
