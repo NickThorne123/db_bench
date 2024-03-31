@@ -12,3 +12,4 @@ pytest==8.0.1
 python-dotenv==1.0.1
 st_pages==0.4.5
 streamlit==1.31.1
+arcticdb==4.3.1
