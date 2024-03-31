@@ -2,7 +2,6 @@ from datetime import date, datetime as dt
 from dotenv import load_dotenv
 from clickhouse_driver import Client
 import streamlit as st
-from streamlit_option_menu import option_menu
 from PIL import Image
 import plotly.express as px
 import datetime
