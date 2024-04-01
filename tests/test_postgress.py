@@ -62,7 +62,7 @@ def test_9_submit_clickhouse():
 def test_10_downsample_postgresql_enable():
     """A test to check whether the downsample toggle can be clicked to enable it"""
     at = AppTest.from_file("pages/PostgresqlDB.py").run()
-    assert at.toggle(key="downsample_toggle_postgresql").run()
+    assert at.toggle(key="downsample_toggle_postgresql").set_value(1).run()
 
 def test_11_increment_downsample_value_postgresql():
     """A test to increment the downsample number input"""
@@ -111,7 +111,7 @@ def test_17_submit_postgresql():
 def test_18_downsample_timescaledb_enable():
     """A test to check whether the downsample toggle can be clicked to enable it"""
     at = AppTest.from_file("pages/TimescaleDB.py").run()
-    assert at.toggle(key="downsample_toggle_timescaledb").run()
+    assert at.toggle(key="downsample_toggle_timescaledb").set_value(1).run()
 
 def test_19_increment_downsample_value_timescaledb():
     """A test to increment the downsample number input"""
@@ -159,7 +159,7 @@ def test_25_submit_timescaledb():
 def test_26_downsample_arcticdb_enable():
     """A test to check whether the downsample toggle can be clicked to enable it"""
     at = AppTest.from_file("pages/ArcticDB.py").run()
-    assert at.toggle(key="downsample_toggle_arcticdb").run()
+    assert at.toggle(key="downsample_toggle_arcticdb").set_value(1).run()
 
 def test_27_increment_downsample_value_arcticdb():
     """A test to increment the downsample number input"""
@@ -275,4 +275,3 @@ def test_37_edit_all_values_arcticdb():
                 assert True
         else:
                 assert False
-
