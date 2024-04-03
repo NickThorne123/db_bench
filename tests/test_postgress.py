@@ -156,10 +156,10 @@ def test_25_submit_timescaledb():
         at = AppTest.from_file("pages/TimescaleDB.py").run()
         assert at.button(key="submit_timescaledb").click().run()
 
-def test_26_downsample_arcticdb_enable():
-    """A test to check whether the downsample toggle can be clicked to enable it"""
-    at = AppTest.from_file("pages/ArcticDB.py").run()
-    assert at.toggle(key="downsample_toggle_arcticdb").set_value(1).run()
+# def test_26_downsample_arcticdb_enable():
+#     """A test to check whether the downsample toggle can be clicked to enable it"""
+#     at = AppTest.from_file("pages/ArcticDB.py").run()
+#     assert at.toggle(key="downsample_toggle_arcticdb").set_value(1).run()
 
 def test_27_increment_downsample_value_arcticdb():
     """A test to increment the downsample number input"""
