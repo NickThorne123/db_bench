@@ -35,7 +35,6 @@ def submit_clicked_postgres(total_elapsed_time_postgres_downsampled, total_elaps
         total_rows = pd.read_sql_query('SELECT count(*) FROM demo_ts', connection)
         total_rows_text.text(f"Total Rows in Postgres Table: {total_rows.iloc[0]['count']:,}")
 
-        data_process_start_time_raw = time.time() #Gets the start time before the data is processed
         #Get postgres table size
         total_table_size = pd.read_sql_query("SELECT pg_size_pretty( pg_total_relation_size('demo_ts'))", connection)
         total_disk_usage_postgres.text(f"Total Disk Usage for Postgres Table: {total_table_size.iloc[0]['pg_size_pretty']}")
@@ -43,10 +42,11 @@ def submit_clicked_postgres(total_elapsed_time_postgres_downsampled, total_elaps
         res_count = pd.read_sql_query(f""" SELECT count(*) FROM demo_ts WHERE cdatetime BETWEEN DATE('{postgresql_start_datetime}') AND DATE('{postgresql_end_datetime}') """, connection).iloc[0]['count']
 
         memory_usage_pre_raw = process.memory_info().rss / 1024 ** 2 #Gets the amount of RAM used before the process is being run in MB
-
+        data_process_start_time_raw = time.time() #Gets the start time before the data is processed
         res_list =  pd.read_sql_query(f""" SELECT cdatetime, ts_values FROM demo_ts
                     WHERE cdatetime BETWEEN DATE('{postgresql_start_datetime}') AND DATE('{postgresql_end_datetime}')
                     ORDER BY cdatetime DESC LIMIT 50000 """, connection)
+        data_process_end_time_raw = time.time() #Gets the end time after data processing is complete
 
         df = pd.DataFrame(res_list, columns =['cdatetime','ts_values'])
         fig = px.line(df, x='cdatetime', y='ts_values')
@@ -55,10 +55,9 @@ def submit_clicked_postgres(total_elapsed_time_postgres_downsampled, total_elaps
         postgres_out_raw_title.markdown("<h4 style='text-align: left;'>Raw Data Chart of 50,000 samples</h4>", unsafe_allow_html=True)
         postgres_out.plotly_chart(fig) # Plots a Plotly chart
 
-        data_process_end_time_raw = time.time() #Gets the end time after data processing is complete
         memory_usage_post_raw = process.memory_info().rss / 1024 ** 2 #Gets the amount of RAM used before the process is being run in MB
 
-        total_elapsed_time_postgres_raw.text(f"Raw Samples Execution time: {round(data_process_end_time_raw - data_process_start_time_raw, 3)} seconds")
+        total_elapsed_time_postgres_raw.text(f"Raw Samples Data Collection time: {round(data_process_end_time_raw - data_process_start_time_raw, 3)} seconds")
         total_ram_usage_postgres_raw.text(f"RAM Usage: {round(memory_usage_post_raw - memory_usage_pre_raw, 2)}MB") #Shows the elapsed time and RAM usage to 3dp above the charts
 
         if downsampling_on_off: # If the downsampling toggle is selected and True
@@ -69,14 +68,14 @@ def submit_clicked_postgres(total_elapsed_time_postgres_downsampled, total_elaps
                                     WHERE  DATE(cdatetime) >= DATE('{postgresql_start_datetime}') and DATE(cdatetime) <= DATE('{postgresql_end_datetime}'))
                                     x WHERE rn % (SELECT COUNT(*) / {downsampling_value} FROM demo_ts WHERE DATE(cdatetime) >= DATE('{postgresql_start_datetime}') and DATE(cdatetime) <= DATE('{postgresql_end_datetime}')) = 0;"""
             df_agg = pd.read_sql_query(downsample_query, connection)
+            data_process_end_time_downsampled = time.time() #Gets the start time before the data is processed
             fig_agg_row_count = df_agg.shape[0]
             fig_agg = px.line(df_agg, x='cdatetime', y='ts_values')
             fig_agg.update_layout(xaxis_title='Date and Time', yaxis_title = 'Downsampled Value')
             fig_agg.update_xaxes(range=[postgresql_start_datetime, postgresql_end_datetime])
             postgres_out_downsampled_title.markdown(f"<h4 style='text-align: left;'>Downsampled Data Chart ({fig_agg_row_count}/{downsampling_value} of {res_count:,} rows)</h4>", unsafe_allow_html=True)
             postgres_out_downsampled.plotly_chart(fig_agg) #Plots a Plotly chart
-            data_process_end_time_downsampled = time.time() #Gets the start time before the data is processed
-            total_elapsed_time_postgres_downsampled.text(f"Downsampled Execution time: {round(data_process_end_time_downsampled - data_process_start_time_downsampled, 3)} seconds") #Shows the elapsed time to 3dp above the charts
+            total_elapsed_time_postgres_downsampled.text(f"Downsampled Data Collection time: {round(data_process_end_time_downsampled - data_process_start_time_downsampled, 3)} seconds") #Shows the elapsed time to 3dp above the charts
     except (Exception) as error:
         print("Error while connecting to PostgreSQL", error)
 
@@ -131,5 +130,12 @@ def postgresql_data_benchmarking_setup():
                                   postgres_out_downsampled_title, postgres_out_downsampled, postgresql_start_datetime, postgresql_end_datetime, downsampling_value,
                                   total_ram_usage_postgres_raw, total_rows_text, total_disk_usage_postgres)
 
+
+def postgresql_data_write_benchmarking_setup():
+    pass
+
+
 ### Show Streamlit GUI
 postgresql_data_benchmarking_setup()
+postgresql_data_write_benchmarking_setup()
+

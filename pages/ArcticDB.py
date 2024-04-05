@@ -28,16 +28,17 @@ def submit_clicked_arcticdb(total_elapsed_time_arcticdb_downsampled, total_elaps
     process = psutil.Process()
 
     try:
+        data_process_start_time_raw = time.time() #Gets the start time before the data is processed
         ac = Arctic(uri="s3s://s3.eu-west-2.amazonaws.com:arcticdbbench?aws_auth=true")
         db_bench_lib = ac["demo_ts"]
         from_storage_df = db_bench_lib.read("demo_ts_frame").data
         df = pd.DataFrame(from_storage_df)
         df.columns = ["cdatetime", "ts_values"]
+        data_process_end_time_raw = time.time() #Gets the end time after data processing is complete
 
         res_count = len(df.loc[df["cdatetime"].between(arcticdb_start_datetime, arcticdb_end_datetime)])
 
         total_rows_text.text(f"Total Rows in ArcticDB Table: {len(from_storage_df):,}")
-        data_process_start_time_raw = time.time() #Gets the start time before the data is processed
         #Get arcticdb table size
         total_disk_usage_arcticdb.text(f"Total Disk Usage for ArcticDB Table: {round(sys.getsizeof(from_storage_df) / 1024 ** 2, 2)}MB")
         memory_usage_pre_raw = process.memory_info().rss / 1024 ** 2 #Gets the amount of RAM used before the process is being run in MB
@@ -49,20 +50,19 @@ def submit_clicked_arcticdb(total_elapsed_time_arcticdb_downsampled, total_elaps
         arcticdb_out_raw_title.markdown("<h4 style='text-align: left;'>Raw Data Chart of 50,000 samples</h4>", unsafe_allow_html=True)
         arcticdb_out.plotly_chart(fig) # Plots a Plotly chart
 
-        data_process_end_time_raw = time.time() #Gets the end time after data processing is complete
         memory_usage_post_raw = process.memory_info().rss / 1024 ** 2 #Gets the amount of RAM used before the process is being run in MB
 
-        total_elapsed_time_arcticdb_raw.text(f"Raw Samples Execution time: {round(data_process_end_time_raw - data_process_start_time_raw, 3)} seconds")
+        total_elapsed_time_arcticdb_raw.text(f"Raw Samples Data Collection time: {round(data_process_end_time_raw - data_process_start_time_raw, 3)} seconds")
         total_ram_usage_arcticdb_raw.text(f"RAM Usage: {round(memory_usage_post_raw - memory_usage_pre_raw, 2)}MB") #Shows the elapsed time and RAM usage to 3dp above the charts
 
         if downsampling_on_off: # If the downsampling toggle is selected and True
             data_process_start_time_downsampled = time.time() #Gets the start time before the data is processed
-
             df["cdatetime"] = pd.to_datetime(df["cdatetime"])
             mask = (df['cdatetime'] > arcticdb_start_datetime) & (df['cdatetime'] <= arcticdb_end_datetime) #Sets the downsample dataframe to the selected time / date
             df = df.loc[mask]
             df = df.set_index("cdatetime")
             df_agg = resample(df, downsampling_value, "s") #Downsamples the data using the resample function
+            data_process_end_time_downsampled = time.time() #Gets the start time before the data is processed
 
             fig_agg_row_count = df_agg.shape[0]
             fig_agg = px.line(df_agg, y='ts_values')
@@ -70,8 +70,7 @@ def submit_clicked_arcticdb(total_elapsed_time_arcticdb_downsampled, total_elaps
             fig_agg.update_xaxes(range=[arcticdb_start_datetime, arcticdb_end_datetime])
             arcticdb_out_downsampled_title.markdown(f"<h4 style='text-align: left;'>Downsampled Data Chart ({fig_agg_row_count}/{downsampling_value} of {res_count:,} rows)</h4>", unsafe_allow_html=True)
             arcticdb_out_downsampled.plotly_chart(fig_agg) #Plots a Plotly chart
-            data_process_end_time_downsampled = time.time() #Gets the start time before the data is processed
-            total_elapsed_time_arcticdb_downsampled.text(f"Downsampled Execution time: {round(data_process_end_time_downsampled - data_process_start_time_downsampled, 3)} seconds") #Shows the elapsed time to 3dp above the charts
+            total_elapsed_time_arcticdb_downsampled.text(f"Downsampled Data Collection time: {round(data_process_end_time_downsampled - data_process_start_time_downsampled, 3)} seconds") #Shows the elapsed time to 3dp above the charts
     except (Exception) as error:
         print("Error while connecting to ArcticDB", error)
 
@@ -125,5 +124,12 @@ def arcticdb_data_benchmarking_setup():
             submit_clicked_arcticdb(total_elapsed_time_arcticdb_downsampled, total_elapsed_time_arcticdb_raw, downsampling_on_off, arcticdb_out_raw_title, arcticdb_out,
                                   arcticdb_out_downsampled_title, arcticdb_out_downsampled, arcticdb_start_datetime, arcticdb_end_datetime, downsampling_value,
                                   total_ram_usage_arcticdb_raw, total_disk_usage_arcticdb, total_rows_text)
+
+    
+def arcticdb_data_write_benchmarking_setup():
+    pass
+
+
 ### Show Streamlit GUI
 arcticdb_data_benchmarking_setup()
+arcticdb_data_write_benchmarking_setup()
