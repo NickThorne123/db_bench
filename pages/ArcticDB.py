@@ -1,7 +1,7 @@
 from datetime import datetime
 from arcticdb import Arctic
 from dotenv import load_dotenv
-from arcticdb_driver import Client
+from clickhouse_driver import Client
 import streamlit as st
 import plotly.express as px
 import datetime

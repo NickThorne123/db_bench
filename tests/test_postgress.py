@@ -275,3 +275,185 @@ def test_37_edit_all_values_arcticdb():
                 assert True
         else:
                 assert False
+
+def test_38_set_start_date_value_clickhouse_write_bench():
+        """A test to set the clickhouse start date"""
+        at = AppTest.from_file("pages/ClickhouseDB.py").run()
+        at.date_input(key="start_date_clickhouse_write").set_value(dt.date(2024, 1, 1)).run()
+        assert at.date_input(key="start_date_clickhouse_write").value == dt.date(2024, 1, 1)
+
+def test_39_set_end_date_value_clickhouse_write_bench():
+        """A test to set the clickhouse end date"""
+        at = AppTest.from_file("pages/ClickhouseDB.py").run()
+        at.date_input(key="end_date_clickhouse_write").set_value(dt.date(2019, 6, 6)).run()
+        assert at.date_input(key="end_date_clickhouse_write").value == dt.date(2019, 6, 6)
+
+def test_40_set_start_time_value_clickhouse_write_bench():
+        """A test to set the clickhouse start time"""
+        at = AppTest.from_file("pages/ClickhouseDB.py").run()
+        at.time_input(key="start_time_clickhouse_write").set_value(dt.time(13, 50))
+        assert at.time_input(key="start_time_clickhouse_write").value == (dt.time(13, 50)) #Dates in a weird format for some reason
+
+def test_41_set_end_time_value_clickhouse_write_bench():
+        """A test to set the clickhouse end time"""
+        at = AppTest.from_file("pages/ClickhouseDB.py").run()
+        at.time_input(key="end_time_clickhouse_write").set_value(dt.time(7, 30))
+        assert at.time_input(key="end_time_clickhouse_write").value == (dt.time(7, 30)) #Dates in a weird format for some reason
+
+@pytest.mark.xfail(reason=("Times out after 3 seconds due to data being imported"))
+def test_42_submit_clickhouse_write_bench():
+        """A test to click the submit button and start collecting clickhouse data"""
+        at = AppTest.from_file("pages/ClickhouseDB.py").run()
+        assert at.button(key="submit_clickhouse_write").click().run()
+
+def test_43_set_start_date_value_postgresql_write_bench():
+        """A test to set the postgresql start date"""
+        at = AppTest.from_file("pages/PostgresqlDB.py").run()
+        at.date_input(key="start_date_postgresql_write").set_value(dt.date(2024, 1, 1)).run()
+        assert at.date_input(key="start_date_postgresql_write").value == dt.date(2024, 1, 1)
+
+def test_44_set_end_date_value_postgresql_write_bench():
+        """A test to set the postgresql end date"""
+        at = AppTest.from_file("pages/PostgresqlDB.py").run()
+        at.date_input(key="end_date_postgresql_write").set_value(dt.date(2019, 6, 6)).run()
+        assert at.date_input(key="end_date_postgresql_write").value == dt.date(2019, 6, 6)
+
+def test_45_set_start_time_value_postgresql_write_bench():
+        """A test to set the postgresql start time"""
+        at = AppTest.from_file("pages/PostgresqlDB.py").run()
+        at.time_input(key="start_time_postgresql_write").set_value(dt.time(13, 50))
+        assert at.time_input(key="start_time_postgresql_write").value == (dt.time(13, 50))
+
+def test_46_set_end_time_value_postgresql_write_bench():
+        """A test to set the postgresql end time"""
+        at = AppTest.from_file("pages/PostgresqlDB.py").run()
+        at.time_input(key="end_time_postgresql_write").set_value(dt.time(7, 30))
+        assert at.time_input(key="end_time_postgresql_write").value == (dt.time(7, 30)) 
+
+@pytest.mark.xfail(reason=("Times out after 3 seconds due to data being imported"))
+def test_47_submit_postgresql_write_bench():
+        """A test to click the submit button and start collecting postgresql data"""
+        at = AppTest.from_file("pages/PostgresqlDB.py").run()
+        assert at.button(key="submit_postgresql_write").click().run()
+
+# def test_48_set_start_date_value_timescaledb_write_bench(): 
+#         """A test to set the timescaledb start date"""
+#         at = AppTest.from_file("pages/TimescaleDB.py").run()
+#         at.date_input(key="start_date_timescaledb_write").set_value(dt.date(2024, 1, 1)).run()
+#         assert at.date_input(key="start_date_timescaledb_write").value == dt.date(2024, 1, 1)
+
+# def test_49_set_end_date_value_timescaledb_write_bench():
+#         """A test to set the timescaledb end date"""
+#         at = AppTest.from_file("pages/TimescaleDB.py").run()
+#         at.date_input(key="end_date_timescaledb_write").set_value(dt.date(2019, 6, 6)).run()
+#         assert at.date_input(key="end_date_timescaledb_write").value == dt.date(2019, 6, 6)
+
+# def test_50_set_start_time_value_timescaledb_write_bench():
+#         """A test to set the timescaledb start time"""
+#         at = AppTest.from_file("pages/TimescaleDB.py").run()
+#         at.time_input(key="start_time_timescaledb_write").set_value(dt.time(13, 50))
+#         assert at.time_input(key="start_time_timescaledb_write").value == (dt.time(13, 50))
+
+# def test_51_set_end_time_value_timescaledb_write_bench():
+#         """A test to set the timescaledb end time"""
+#         at = AppTest.from_file("pages/TimescaleDB.py").run()
+#         at.time_input(key="end_time_timescaledb_write").set_value(dt.time(7, 30))
+#         assert at.time_input(key="end_time_timescaledb_write").value == (dt.time(7, 30))
+
+# def test_52_submit_timescaledb_write_bench():
+#         """A test to click the submit button and start collecting timescaledb data"""
+#         at = AppTest.from_file("pages/TimescaleDB.py").run()
+#         assert at.button(key="submit_timescaledb_write").click().run()
+
+def test_53_set_start_date_value_arcticdb_write_bench():
+        """A test to set the arcticdb start date"""
+        at = AppTest.from_file("pages/ArcticDB.py").run()
+        at.date_input(key="start_date_arcticdb_write").set_value(dt.date(2024, 1, 1)).run()
+        assert at.date_input(key="start_date_arcticdb_write").value == dt.date(2024, 1, 1)
+
+def test_54_set_end_date_value_arcticdb_write_bench():
+        """A test to set the arcticdb end date"""
+        at = AppTest.from_file("pages/ArcticDB.py").run()
+        at.date_input(key="end_date_arcticdb_write").set_value(dt.date(2019, 6, 6)).run()
+        assert at.date_input(key="end_date_arcticdb_write").value == dt.date(2019, 6, 6)
+
+def test_55_set_start_time_value_arcticdb_write_bench():
+        """A test to set the arcticdb start time"""
+        at = AppTest.from_file("pages/ArcticDB.py").run()
+        at.time_input(key="start_time_arcticdb_write").set_value(dt.time(13, 50))
+        assert at.time_input(key="start_time_arcticdb_write").value == (dt.time(13, 50))
+
+def test_56_set_end_time_value_arcticdb_write_bench():
+        """A test to set the arcticdb end time"""
+        at = AppTest.from_file("pages/ArcticDB.py").run()
+        at.time_input(key="end_time_arcticdb_write").set_value(dt.time(7, 30))
+        assert at.time_input(key="end_time_arcticdb_write").value == (dt.time(7, 30))
+
+@pytest.mark.xfail(reason=("Times out after 3 seconds due to data being imported"))
+def test_57_submit_arcticdb_write_bench():
+        """A test to click the submit button and start collecting timescaledb data"""
+        at = AppTest.from_file("pages/ArcticDB.py").run()
+        assert at.button(key="submit_arcticdb_write").click().run()
+
+@pytest.mark.xfail(reason=("Times out after 3 seconds due to data being imported"))
+def test_58_edit_all_values_clickhouse_write_bench():
+        """A test to change all the controlable values for the chosen DB then check they are the same when Submit button selected"""
+        at = AppTest.from_file("pages/ClickhouseDB.py").run()
+        at.date_input(key="start_date_clickhouse_write").set_value(dt.date(2021, 9, 8)).run()
+        at.date_input(key="end_date_clickhouse_write").set_value(dt.date(2022, 6, 6)).run()
+        at.time_input(key="start_time_clickhouse_write").set_value(dt.time(11, 35))
+        at.time_input(key="end_time_clickhouse_write").set_value(dt.time(14, 00))
+        at.button(key="submit_clickhouse_write").click().run()
+        
+        if at.date_input(key="start_date_clickhouse_write").value == dt.date(2021, 9, 8) and at.date_input(key="end_date_clickhouse_write").value == dt.date(2022, 6, 6) \
+                and at.time_input(key="start_time_clickhouse_write").value == (dt.time(11, 35)) and at.time_input(key="end_time_clickhouse_write").value == (dt.time(14, 00)):
+               assert True
+        else:
+               assert False
+
+@pytest.mark.xfail(reason=("Times out after 3 seconds due to data being imported"))
+def test_59_edit_all_values_postgresql_write_bench():
+        """A test to change all the controlable values for the chosen DB then check they are the same when Submit button selected"""
+        at = AppTest.from_file("pages/PostgresqlDB.py").run()
+        at.date_input(key="start_date_postgresql_write").set_value(dt.date(2021, 9, 8)).run()
+        at.date_input(key="end_date_postgresql_write").set_value(dt.date(2022, 6, 6)).run()
+        at.time_input(key="start_time_postgresql_write").set_value(dt.time(11, 35))
+        at.time_input(key="end_time_postgresql_write").set_value(dt.time(14, 00))
+        at.button(key="submit_postgresql_write").click().run()
+
+        if at.date_input(key="start_date_postgresql_write").value == dt.date(2021, 9, 8) and at.date_input(key="end_date_postgresql_write").value == dt.date(2022, 6, 6) \
+                and at.time_input(key="start_time_postgresql_write").value == (dt.time(11, 35)) and at.time_input(key="end_time_postgresql_write").value == (dt.time(14, 00)):
+                assert True
+        else:
+                assert False
+
+# def test_60_edit_all_values_timescaledb_write_bench():
+#         """A test to change all the controlable values for the chosen DB then check they are the same when Submit button selected"""
+#         at = AppTest.from_file("pages/TimescaleDB.py").run()
+#         at.date_input(key="start_date_timescaledb_write").set_value(dt.date(2021, 9, 8)).run()
+#         at.date_input(key="end_date_timescaledb_write").set_value(dt.date(2022, 6, 6)).run()
+#         at.time_input(key="start_time_timescaledb_write").set_value(dt.time(11, 35))
+#         at.time_input(key="end_time_timescaledb_write").set_value(dt.time(14, 00))
+#         at.button(key="submit_timescaledb_write").click().run()
+
+#         if at.date_input(key="start_date_timescaledb_write").value == dt.date(2021, 9, 8) and at.date_input(key="end_date_timescaledb_write").value == dt.date(2022, 6, 6) \
+#                 and at.time_input(key="start_time_timescaledb_write").value == (dt.time(11, 35)) and at.time_input(key="end_time_timescaledb_write").value == (dt.time(14, 00)):
+#                 assert True
+#         else:
+#                 assert False
+
+@pytest.mark.xfail(reason=("Times out after 3 seconds due to data being imported"))
+def test_61_edit_all_values_arcticdb_write_bench():
+        """A test to change all the controlable values for the chosen DB then check they are the same when Submit button selected"""
+        at = AppTest.from_file("pages/ArcticDB.py").run()
+        at.date_input(key="start_date_arcticdb_write").set_value(dt.date(2021, 9, 8)).run()
+        at.date_input(key="end_date_arcticdb_write").set_value(dt.date(2022, 6, 6)).run()
+        at.time_input(key="start_time_arcticdb_write").set_value(dt.time(11, 35))
+        at.time_input(key="end_time_arcticdb_write").set_value(dt.time(14, 00))
+        at.button(key="submit_arcticdb_write").click().run()
+
+        if at.date_input(key="start_date_arcticdb_write").value == dt.date(2021, 9, 8) and at.date_input(key="end_date_arcticdb_write").value == dt.date(2022, 6, 6) \
+                and at.time_input(key="start_time_arcticdb_write").value == (dt.time(11, 35)) and at.time_input(key="end_time_arcticdb_write").value == (dt.time(14, 00)):
+                assert True
+        else:
+                assert False
