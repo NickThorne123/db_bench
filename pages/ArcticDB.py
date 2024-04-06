@@ -1,6 +1,7 @@
 from datetime import datetime
 from arcticdb import Arctic
 from dotenv import load_dotenv
+from arcticdb_driver import Client
 import streamlit as st
 import plotly.express as px
 import datetime
@@ -13,6 +14,11 @@ import os
 load_dotenv(override=True)
 
 ARCTIC_URL=os.getenv('ARCTIC_URL')
+CH_HOST=os.getenv('CH_HOST')
+CH_PORT=os.getenv('CH_PORT')
+CH_PASSWORD=os.getenv('CH_PASSWORD')
+CH_USER=os.getenv('CH_USER')
+CH_DBNAME=os.getenv('CH_DBNAME')
 
 st.set_page_config(page_title="ArcticDB | DB Bench", page_icon="./icons/pageIcon.png")
 st.markdown("<style>div.row-widget.stRadio > div{flex-direction:row;}</style>", unsafe_allow_html=True) #Shows radio buttons in a row. Streamlit default is vertical list
@@ -29,7 +35,7 @@ def submit_clicked_arcticdb(total_elapsed_time_arcticdb_downsampled, total_elaps
 
     try:
         data_process_start_time_raw = time.time() #Gets the start time before the data is processed
-        ac = Arctic(uri="s3s://s3.eu-west-2.amazonaws.com:arcticdbbench?aws_auth=true")
+        ac = Arctic(uri=ARCTIC_URL)
         db_bench_lib = ac["demo_ts"]
         from_storage_df = db_bench_lib.read("demo_ts_frame").data
         df = pd.DataFrame(from_storage_df)
@@ -121,15 +127,100 @@ def arcticdb_data_benchmarking_setup():
         if arcticdb_start_datetime > arcticdb_end_datetime:
             st.error("Start date / time cannot be after end date / time")
         else:
-            submit_clicked_arcticdb(total_elapsed_time_arcticdb_downsampled, total_elapsed_time_arcticdb_raw, downsampling_on_off, arcticdb_out_raw_title, arcticdb_out,
-                                  arcticdb_out_downsampled_title, arcticdb_out_downsampled, arcticdb_start_datetime, arcticdb_end_datetime, downsampling_value,
-                                  total_ram_usage_arcticdb_raw, total_disk_usage_arcticdb, total_rows_text)
+            submit_clicked_arcticdb(total_elapsed_time_arcticdb_downsampled, total_elapsed_time_arcticdb_raw, downsampling_on_off, arcticdb_out_raw_title, arcticdb_out, 
+                                  arcticdb_out_downsampled_title, arcticdb_out_downsampled, arcticdb_start_datetime, arcticdb_end_datetime, downsampling_value, 
+                                  total_ram_usage_arcticdb_raw, total_rows_text, total_disk_usage_arcticdb)
+
+
+def submit_clicked_arcticdb_write(arcticdb_start_datetime_write, arcticdb_end_datetime_write,total_elapsed_time_arcticdb_write, arcticdb_successful_write, arcticdb_out_total_rows_write,
+                                    total_disk_usage_arcticdb_write, arcticdb_data_load_text):
+    client = Client(host=CH_HOST, port=CH_PORT, settings={'use_numpy': True}, user=CH_USER, password=CH_PASSWORD)
+    ac = Arctic(uri=ARCTIC_URL)
+
+    arcticdb_data_load_text.text("Clickhouse Data Being Created...")
+    try:
+        data_process_start_time_write = time.time() #Gets the start time before the data is written
+        arcticdb_write_query =  f""" CREATE TABLE ts_db.arcticdb_demo_write
+                                        ENGINE = MergeTree
+                                        ORDER BY tuple()
+                                        AS
+                                        SELECT toDateTime(arrayJoin(range(toUInt32(toDateTime('{arcticdb_start_datetime_write}')), toUInt32(toDateTime('{arcticdb_end_datetime_write}')), 1) )) as cdatetime,
+                                            toSecond(toDateTime(arrayJoin(range(toUInt32(toDateTime('{arcticdb_start_datetime_write}')), toUInt32(toDateTime('{arcticdb_end_datetime_write}')), 1) ))) +
+                                            toMinute(toDateTime(arrayJoin(range(toUInt32(toDateTime('{arcticdb_start_datetime_write}')), toUInt32(toDateTime('{arcticdb_end_datetime_write}')), 1) ))) +
+                                            2 * toHour(toDateTime(arrayJoin(range(toUInt32(toDateTime('{arcticdb_start_datetime_write}')), toUInt32(toDateTime('{arcticdb_end_datetime_write}')), 1) ))) +
+                                            5 * toDayOfWeek(toDateTime(arrayJoin(range(toUInt32(toDateTime('{arcticdb_start_datetime_write}')), toUInt32(toDateTime('{arcticdb_end_datetime_write}')), 1) ))) +
+                                            8 * toWeek(toDateTime(arrayJoin(range(toUInt32(toDateTime('{arcticdb_start_datetime_write}')), toUInt32(toDateTime('{arcticdb_end_datetime_write}')), 1) ))) +
+                                            12 * toMonth(toDateTime(arrayJoin(range(toUInt32(toDateTime('{arcticdb_start_datetime_write}')), toUInt32(toDateTime('{arcticdb_end_datetime_write}')), 1) ))) +
+                                            20 * (toYear(toDateTime(arrayJoin(range(toUInt32(toDateTime('{arcticdb_start_datetime_write}')), toUInt32(toDateTime('{arcticdb_end_datetime_write}')), 1) )))-{arcticdb_end_datetime_write.year}) as ts_values """
+        client.execute(arcticdb_write_query, settings={'use_numpy': True}) #Creates the data inside the table
+        data_process_end_time_write = time.time() #Gets the end time after the data is written
+
+        total_rows_query_write =  f""" SELECT count(*) FROM ts_db.arcticdb_demo_write  """
+        total_rows_write = client.execute(total_rows_query_write, settings={'use_numpy': True})[0][0]
+        clickhouse_get_data_query =  f""" SELECT * from ts_db.arcticdb_demo_write """
+        arcticdb_data_load_text.text("Clickhouse Data Created... Writing to ArcticDB Table...")
+
+        ac.create_library("demo_ts_write")
+        clickhouse_data = client.execute(clickhouse_get_data_query, settings={'use_numpy': True})
+        df_write = pd.DataFrame(clickhouse_data)
+        db_bench_lib = ac["demo_ts_write"]
+        db_bench_lib.write("demo_ts_frame_write", df_write)
+
+        arcticdb_data_load_text.empty()
+        from_storage_df = db_bench_lib.read("demo_ts_frame_write").data
+        total_disk_usage_arcticdb_write.text(f"Total Disk Usage for ArcticDB Table: {round(sys.getsizeof(from_storage_df) / 1024 ** 2, 2)}MB")
+        arcticdb_out_total_rows_write.text(f"Total Rows Written to arcticdb Table: {total_rows_write:,}")
+        arcticdb_successful_write.text("Data successfully written to arcticdb Database")
+        total_elapsed_time_arcticdb_write.text(f"Time to Write Data to Table: {round(data_process_end_time_write - data_process_start_time_write, 3)} seconds")
+    except:
+       st.error("Error writing data to arcticdb Database")
+    try:
+        drop_table_query_write = """DROP TABLE ts_db.arcticdb_demo_write""" #Removes the table before its recreated
+        client.execute(drop_table_query_write, settings={'use_numpy': True})
+    except:
+        print("Table empty")
 
     
 def arcticdb_data_write_benchmarking_setup():
-    pass
+    #use sql to create a new table if not exist already. If exist, drop the table.
+    """Displays the layout of the arcticdb widgets in streamlit to send the data to the database"""
+    col1, col2 = st.columns([1,11])
+    with col2:
+        st.subheader("Arctic Write Data Benchmarking")
+        st.text("Note: Clickhouse data is used to populate the ArcticDB dataframe. Please make sure Clickhouse is running.")
+    start_time_date_col_write, end_time_date_col_write = st.columns([1, 1]) #Creates columns for the start and end date / time pickers
+    with start_time_date_col_write:
+        start_date_arcticdb_write = st.date_input("Data Start Date:", datetime.date(2021, 1, 1), key="start_date_arcticdb_write")
+        start_time_arcticdb_write = st.time_input("Data Start Time:", key="start_time_arcticdb_write")
+    with end_time_date_col_write:
+        end_date_arcticdb_write = st.date_input("Data End Date:", datetime.date(2022, 1, 2), key="end_date_arcticdb_write")
+        end_time_arcticdb_write = st.time_input("Data End Time:", key="end_time_arcticdb_write")
+    arcticdb_start_datetime_write = datetime.datetime.combine(start_date_arcticdb_write, start_time_arcticdb_write) #concatenates the date and time
+    arcticdb_end_datetime_write = datetime.datetime.combine(end_date_arcticdb_write, end_time_arcticdb_write)
 
+    st.write("") #padding
+
+    #GUI chart widget placement
+    run_query_submit_write = st.button("Submit", key="submit_arcticdb_write")
+    arcticdb_data_load_text = st.empty()
+    arcticdb_successful_write = st.empty()
+    st.write("") # padding
+    total_disk_usage_arcticdb_write = st.empty() #Total disk usage
+    arcticdb_out_total_rows_write = st.empty()
+    total_elapsed_time_arcticdb_write = st.empty() #Empty templates in the place they will appear on the UI. Can be called at any time using any widget)
+
+    if run_query_submit_write:
+        if arcticdb_start_datetime_write > arcticdb_end_datetime_write:
+            st.error("Start date / time cannot be after end date / time")
+        else:
+            submit_clicked_arcticdb_write(arcticdb_start_datetime_write, arcticdb_end_datetime_write,total_elapsed_time_arcticdb_write, arcticdb_successful_write, arcticdb_out_total_rows_write,
+                                            total_disk_usage_arcticdb_write, arcticdb_data_load_text)
 
 ### Show Streamlit GUI
 arcticdb_data_benchmarking_setup()
+st.write("") #padding
+st.write("")
+st.write("")
+st.write("")
+st.write("")
 arcticdb_data_write_benchmarking_setup()

@@ -131,11 +131,104 @@ def postgresql_data_benchmarking_setup():
                                   total_ram_usage_postgres_raw, total_rows_text, total_disk_usage_postgres)
 
 
-def postgresql_data_write_benchmarking_setup():
-    pass
+def submit_clicked_postgresql_write(postgresql_start_datetime_write, postgresql_end_datetime_write, total_elapsed_time_postgresql_write, postgresql_successful_write, postgresql_out_total_rows_write,
+                                    total_disk_usage_postgresql_write, postgresql_data_load_text):
+    connection = init_connection()
+    connection.autocommit = True
+    cursor = connection.cursor()
 
+    postgresql_data_load_text.text("Data Loading...")
+
+    try:
+        postgresql_table_write_query =  """CREATE TABLE demo_write (
+                                    cdatetime DATE,
+                                    ts_values INTEGER
+                                    );"""
+        cursor.execute(postgresql_table_write_query) #Creates the data inside the table
+        connection.commit()
+    except:
+        print("Table already exists - Writing Data")
+    try:
+        data_process_start_time_write = time.time() #Gets the start time before the data is written
+        postgresql_write_query =  f"""WITH time_series AS (
+                                            SELECT * FROM generate_series(
+                                            '{postgresql_start_datetime_write}'::timestamp,
+                                            '{postgresql_end_datetime_write}'::timestamp,
+                                            '1 second'::interval
+                                            ) as cdatetime
+                                        ),
+                                        random_values AS (
+                                            SELECT random() * 100 AS ts_values -- Adjust range as needed
+                                            FROM generate_series(1, 5) -- Generate 5 random values
+                                        )
+                                        INSERT INTO demo_write (cdatetime, ts_values)
+                                        SELECT time_series.cdatetime, random_values.ts_values
+                                        FROM time_series
+                                        CROSS JOIN random_values;"""
+        cursor.execute(postgresql_write_query) #Creates the data inside the table
+        connection.commit()
+        data_process_end_time_write = time.time() #Gets the end time after the data is written
+
+        total_rows_query_write =  f""" SELECT count(*) FROM demo_write  """
+        total_rows_write = pd.read_sql_query(total_rows_query_write, connection)
+        total_disk_usage_query_write = pd.read_sql_query("SELECT pg_size_pretty( pg_total_relation_size('demo_write'))", connection)
+        connection.close()
+
+        postgresql_data_load_text.empty()
+        postgresql_out_total_rows_write.text(f"Total Rows Written to Postgres Table: {total_rows_write.iloc[0]['count']:,}")
+        postgresql_successful_write.text("Data successfully written to Postgres Database")
+        total_elapsed_time_postgresql_write.text(f"Time to Write Data to Table: {round(data_process_end_time_write - data_process_start_time_write, 3)} seconds")
+        total_disk_usage_postgresql_write.text(f"Total Disk Usage of Written Data: {total_disk_usage_query_write.iloc[0]['pg_size_pretty']}")
+    except:
+       st.error("Error writing data to postgresql Database")
+    try:
+        drop_table_query_write = """DROP TABLE demo_write;""" #Removes the table before its recreated
+        cursor.execute(drop_table_query_write)
+        connection.commit()
+    except:
+        print("Table empty")
+
+
+def postgresql_data_write_benchmarking_setup():
+    #use sql to create a new table if not exist already. If exist, drop the table.
+    """Displays the layout of the postgresql widgets in streamlit to send the data to the database"""
+    col1, col2 = st.columns([1,11])
+    with col2:
+        st.subheader("Postgres Write Data Benchmarking")
+
+    start_time_date_col_write, end_time_date_col_write = st.columns([1, 1]) #Creates columns for the start and end date / time pickers
+    with start_time_date_col_write:
+        start_date_postgresql_write = st.date_input("Data Start Date:", datetime.date(2021, 1, 1), key="start_date_postgresql_write")
+        start_time_postgresql_write = st.time_input("Data Start Time:", key="start_time_postgresql_write")
+    with end_time_date_col_write:
+        end_date_postgresql_write = st.date_input("Data End Date:", datetime.date(2022, 1, 2), key="end_date_postgresql_write")
+        end_time_postgresql_write = st.time_input("Data End Time:", key="end_time_postgresql_write")
+    postgresql_start_datetime_write = datetime.datetime.combine(start_date_postgresql_write, start_time_postgresql_write) #concatenates the date and time
+    postgresql_end_datetime_write = datetime.datetime.combine(end_date_postgresql_write, end_time_postgresql_write)
+
+    st.write("") #padding
+
+    #GUI chart widget placement
+    run_query_submit_write = st.button("Submit", key="submit_postgresql_write")
+    postgresql_data_load_text = st.empty()
+    postgresql_successful_write = st.empty()
+    st.write("") # padding
+    total_disk_usage_postgresql_write = st.empty() #Total disk usage
+    postgresql_out_total_rows_write = st.empty()
+    total_elapsed_time_postgresql_write = st.empty() #Empty templates in the place they will appear on the UI. Can be called at any time using any widget)
+
+    if run_query_submit_write:
+        if postgresql_start_datetime_write > postgresql_end_datetime_write:
+            st.error("Start date / time cannot be after end date / time")
+        else:
+            submit_clicked_postgresql_write(postgresql_start_datetime_write, postgresql_end_datetime_write,total_elapsed_time_postgresql_write, postgresql_successful_write, postgresql_out_total_rows_write,
+                                            total_disk_usage_postgresql_write, postgresql_data_load_text)
 
 ### Show Streamlit GUI
 postgresql_data_benchmarking_setup()
+st.write("") #padding
+st.write("")
+st.write("")
+st.write("")
+st.write("")
 postgresql_data_write_benchmarking_setup()
-

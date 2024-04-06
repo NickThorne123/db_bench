@@ -44,7 +44,7 @@ def submit_clicked_clickhouse(total_elapsed_time_clickhouse_downsampled, total_e
         #NOTE if an SQL command to check the table size can be found then use that instead but this should be accurate
         total_table_size = round(((total_rows * 8) / 1024 ** 2), 2)
         if total_table_size >= 1024: #If size is over 1024MB, divide by 1024 and show as GB
-            total_disk_usage_clickhouse.text(f"Total Disk Usage for Clickhouse Table: {total_table_size / 1024}GB")
+            total_disk_usage_clickhouse.text(f"Total Disk Usage for Clickhouse Table: {round(total_table_size / 1024, 2)}GB")
         else:
             total_disk_usage_clickhouse.text(f"Total Disk Usage for Clickhouse Table: {total_table_size}MB")
 
@@ -143,14 +143,9 @@ def clickhouse_data_benchmarking_setup():
 
 
 def submit_clicked_clickhouse_write(clickhouse_start_datetime_write, clickhouse_end_datetime_write, total_elapsed_time_clickhouse_write, clickhouse_successful_write, clickhouse_out_total_rows_write,
-                                    total_disk_usage_clickhouse_write):
+                                    total_disk_usage_clickhouse_write, clickhouse_data_load_text):
     client = get_ch_client()
-    process = psutil.Process()
-    try:
-        drop_table_query_write = """DROP TABLE ts_db.demo_write""" #Removes the table before its recreated
-        client.execute(drop_table_query_write, settings={'use_numpy': True})
-    except:
-        print("Table empty - Writing Data")
+    clickhouse_data_load_text.text("Data Loading...")
     try:
         data_process_start_time_write = time.time() #Gets the start time before the data is written
         clickhouse_write_query =  f""" CREATE TABLE ts_db.demo_write 
@@ -173,18 +168,22 @@ def submit_clicked_clickhouse_write(clickhouse_start_datetime_write, clickhouse_
 
         total_disk_usage_query_write = round(((total_rows_write * 8) / 1024 ** 2), 2)
 
+        clickhouse_data_load_text.empty()
         clickhouse_out_total_rows_write.text(f"Total Rows Written to Clickhouse Table: {total_rows_write:,}")
         clickhouse_successful_write.text("Data successfully written to Clickhouse Database")
         total_elapsed_time_clickhouse_write.text(f"Time to Write Data to Table: {round(data_process_end_time_write - data_process_start_time_write, 3)} seconds")
         
         if total_disk_usage_query_write >= 1024:
-            total_disk_usage_clickhouse_write.text(f"Total Disk Usage of Written Data: {total_disk_usage_query_write / 1024}GB")
+            total_disk_usage_clickhouse_write.text(f"Total Disk Usage of Written Data: {round(total_disk_usage_query_write / 1024, 2)}GB")
         else:
             total_disk_usage_clickhouse_write.text(f"Total Disk Usage of Written Data: {total_disk_usage_query_write}MB")
-
     except:
-        st.error("Error writing data to Clickhouse Database")
-
+      st.error("Error writing data to Clickhouse Database")
+    try:
+        drop_table_query_write = """DROP TABLE ts_db.demo_write""" #Removes the table before its recreated
+        client.execute(drop_table_query_write, settings={'use_numpy': True})
+    except:
+        print("Table empty")
 
 
 def clickhouse_data_write_benchmarking_setup():
@@ -208,6 +207,7 @@ def clickhouse_data_write_benchmarking_setup():
 
     #GUI chart widget placement
     run_query_submit_write = st.button("Submit", key="submit_clickhouse_write")
+    clickhouse_data_load_text = st.empty()
     clickhouse_successful_write = st.empty()
     st.write("") # padding
     total_disk_usage_clickhouse_write = st.empty() #Total disk usage
@@ -219,16 +219,14 @@ def clickhouse_data_write_benchmarking_setup():
             st.error("Start date / time cannot be after end date / time")
         else:
             submit_clicked_clickhouse_write(clickhouse_start_datetime_write, clickhouse_end_datetime_write,total_elapsed_time_clickhouse_write, clickhouse_successful_write, clickhouse_out_total_rows_write,
-                                            total_disk_usage_clickhouse_write)
+                                            total_disk_usage_clickhouse_write, clickhouse_data_load_text)
 
 
 ### Show Streamlit GUI
 clickhouse_data_benchmarking_setup()
-
 st.write("") #padding
 st.write("")
 st.write("")
 st.write("")
 st.write("")
-
 clickhouse_data_write_benchmarking_setup()
