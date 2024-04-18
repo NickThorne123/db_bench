@@ -36,6 +36,7 @@ services:
         max-file: "3"
  #  Postgres container
   db:
+    shm_size: 512MB
     # network_mode: host
     container_name: psql_db
     restart: always
@@ -57,6 +58,7 @@ services:
       - POSTGRES_DB=db
 
   timescaledb:
+    shm_size: 512MB
     image: timescale/timescaledb:latest-pg13
     restart: always
     ports:
@@ -66,21 +68,21 @@ services:
       POSTGRES_PASSWORD: postgres
     volumes:
       - /data/timescaledb:/var/lib/postgresql/data
-  prometheus_postgresql_adapter:
-    depends_on:
-    - timescaledb
-    environment:
-      TS_PROM_LOG_LEVEL: debug
-      TS_PROM_DB_CONNECT_RETRIES: 10
-      TS_PROM_DB_HOST: timescaledb
-      TS_PROM_DB_USER: timescaledb
-      TS_PROM_DB_PASSWORD: password
-      TS_PROM_DB_NAME: postgres
-      TS_PROM_WEB_TELEMETRY_PATH: /metrics-text
-    image: timescale/timescale-prometheus:latest
-    restart: always
-    ports:
-    - 9201:9201/tcp
+  # prometheus_postgresql_adapter:
+  #   depends_on:
+  #   - timescaledb
+  #   environment:
+  #     TS_PROM_LOG_LEVEL: debug
+  #     TS_PROM_DB_CONNECT_RETRIES: 10
+  #     TS_PROM_DB_HOST: timescaledb
+  #     TS_PROM_DB_USER: timescaledb
+  #     TS_PROM_DB_PASSWORD: password
+  #     TS_PROM_DB_NAME: postgres
+  #     TS_PROM_WEB_TELEMETRY_PATH: /metrics-text
+  #   image: timescale/timescale-prometheus:latest
+  #   restart: always
+  #   ports:
+  #   - 9201:9201/tcp
 
 
   
