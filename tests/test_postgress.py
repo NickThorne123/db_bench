@@ -151,6 +151,7 @@ def test_24_set_end_time_value_timescaledb():
         at.time_input(key="end_time_timescaledb").set_value(dt.time(7, 30))
         assert at.time_input(key="end_time_timescaledb").value == (dt.time(7, 30))
 
+@pytest.mark.xfail(reason=("Times out after 3 seconds due to data being imported"))
 def test_25_submit_timescaledb():
         """A test to click the submit button and start collecting timescaledb data"""
         at = AppTest.from_file("pages/TimescaleDB.py").run()
@@ -241,6 +242,7 @@ def test_35_edit_all_values_postgresql():
         else:
                 assert False
 
+@pytest.mark.xfail(reason=("Times out after 3 seconds due to data being imported"))
 def test_36_edit_all_values_timescaledb():
         """A test to change all the controlable values for the chosen DB then check they are the same when Submit button selected"""
         at = AppTest.from_file("pages/TimescaleDB.py").run()

@@ -58,7 +58,7 @@ services:
       - POSTGRES_DB=db
 
   timescaledb:
-    shm_size: 1024MB
+    shm_size: 512MB
     image: timescale/timescaledb:latest-pg13
     restart: always
     ports:
