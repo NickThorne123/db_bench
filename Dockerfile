@@ -19,4 +19,8 @@ USER appuser
 # Copy project
 COPY . /code/
 
+FROM postgres:13
+
+RUN df -h | grep shm
+
 # See ch2hello for remote debugging

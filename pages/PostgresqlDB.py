@@ -56,6 +56,7 @@ def submit_clicked_postgres(total_elapsed_time_postgres_downsampled, total_elaps
         postgres_out.plotly_chart(fig) # Plots a Plotly chart
 
         memory_usage_post_raw = process.memory_info().rss / 1024 ** 2 #Gets the amount of RAM used before the process is being run in MB
+        data_process_end_time_raw = time.time() #Gets the end time after data processing is complete
 
         total_elapsed_time_postgres_raw.text(f"Raw Samples Data Collection time: {round(data_process_end_time_raw - data_process_start_time_raw, 3)} seconds")
         total_ram_usage_postgres_raw.text(f"RAM Usage: {round(memory_usage_post_raw - memory_usage_pre_raw, 2)}MB") #Shows the elapsed time and RAM usage to 3dp above the charts
