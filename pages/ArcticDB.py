@@ -158,7 +158,7 @@ def submit_clicked_arcticdb_write(arcticdb_start_datetime_write, arcticdb_end_da
         total_rows_query_write =  f""" SELECT count(*) FROM ts_db.arcticdb_demo_write  """
         total_rows_write = client.execute(total_rows_query_write, settings={'use_numpy': True})[0][0]
         clickhouse_get_data_query =  f""" SELECT * from ts_db.arcticdb_demo_write """
-        arcticdb_data_load_text.text("Clickhouse Data Created... Writing to ArcticDB Table...")
+        arcticdb_data_load_text.text("Clickhouse Data Created... Writing to ArcticDB...")
 
         ac.create_library("demo_ts_write")
         clickhouse_data = client.execute(clickhouse_get_data_query, settings={'use_numpy': True})
@@ -177,6 +177,8 @@ def submit_clicked_arcticdb_write(arcticdb_start_datetime_write, arcticdb_end_da
     try:
         drop_table_query_write = """DROP TABLE ts_db.arcticdb_demo_write""" #Removes the table before its recreated
         client.execute(drop_table_query_write, settings={'use_numpy': True})
+        db_bench_lib.delete("demo_ts_write") #Deletes the library from Arctic in the AWS Bucket
+        print("Table Removed")
     except:
         print("Table empty")
 
@@ -187,7 +189,7 @@ def arcticdb_data_write_benchmarking_setup():
     col1, col2 = st.columns([1,11])
     with col2:
         st.subheader("Arctic Write Data Benchmarking")
-        st.text("Note: Clickhouse data is used to populate the ArcticDB dataframe. Please make sure Clickhouse is running.")
+    st.text("Note: Clickhouse data is used to populate the ArcticDB dataframe. Please make sure the Clickhouse container is running.")
     start_time_date_col_write, end_time_date_col_write = st.columns([1, 1]) #Creates columns for the start and end date / time pickers
     with start_time_date_col_write:
         start_date_arcticdb_write = st.date_input("Data Start Date:", datetime.date(2021, 1, 1), key="start_date_arcticdb_write")

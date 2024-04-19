@@ -145,7 +145,7 @@ def clickhouse_data_benchmarking_setup():
 def submit_clicked_clickhouse_write(clickhouse_start_datetime_write, clickhouse_end_datetime_write, total_elapsed_time_clickhouse_write, clickhouse_successful_write, clickhouse_out_total_rows_write,
                                     total_disk_usage_clickhouse_write, clickhouse_data_load_text):
     client = get_ch_client()
-    clickhouse_data_load_text.text("Data Loading...")
+    clickhouse_data_load_text.text("Data Being Written...")
     try:
         data_process_start_time_write = time.time() #Gets the start time before the data is written
         clickhouse_write_query =  f""" CREATE TABLE ts_db.demo_write 
@@ -182,6 +182,7 @@ def submit_clicked_clickhouse_write(clickhouse_start_datetime_write, clickhouse_
     try:
         drop_table_query_write = """DROP TABLE ts_db.demo_write""" #Removes the table before its recreated
         client.execute(drop_table_query_write, settings={'use_numpy': True})
+        print("Table Removed")
     except:
         print("Table empty")
 

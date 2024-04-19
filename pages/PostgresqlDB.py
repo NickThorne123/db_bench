@@ -138,7 +138,7 @@ def submit_clicked_postgresql_write(postgresql_start_datetime_write, postgresql_
     connection.autocommit = True
     cursor = connection.cursor()
 
-    postgresql_data_load_text.text("Data Loading...")
+    postgresql_data_load_text.text("Data Being Written...")
 
     try:
         postgresql_table_write_query =  """CREATE TABLE demo_write (
@@ -173,7 +173,6 @@ def submit_clicked_postgresql_write(postgresql_start_datetime_write, postgresql_
         total_rows_query_write =  f""" SELECT count(*) FROM demo_write  """
         total_rows_write = pd.read_sql_query(total_rows_query_write, connection)
         total_disk_usage_query_write = pd.read_sql_query("SELECT pg_size_pretty( pg_total_relation_size('demo_write'))", connection)
-        connection.close()
 
         postgresql_data_load_text.empty()
         postgresql_out_total_rows_write.text(f"Total Rows Written to Postgres Table: {total_rows_write.iloc[0]['count']:,}")
@@ -186,8 +185,11 @@ def submit_clicked_postgresql_write(postgresql_start_datetime_write, postgresql_
         drop_table_query_write = """DROP TABLE demo_write;""" #Removes the table before its recreated
         cursor.execute(drop_table_query_write)
         connection.commit()
+        connection.close()
+        print("Table Removed")
     except:
         print("Table empty")
+        connection.close()
 
 
 def postgresql_data_write_benchmarking_setup():
