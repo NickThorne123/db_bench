@@ -131,5 +131,107 @@ def timescaledb_data_benchmarking_setup():
                                   timescale_out_downsampled_title, timescale_out_downsampled, timescaledb_start_datetime, timescaledb_end_datetime, downsampling_value,
                                   total_ram_usage_timescale_raw, total_rows_text, total_disk_usage_timescale)
 
+
+def submit_clicked_timescaledb_write(timescaledb_start_datetime_write, timescaledb_end_datetime_write, total_elapsed_time_timescaledb_write, timescaledb_successful_write, timescaledb_out_total_rows_write,
+                                    total_disk_usage_timescaledb_write, timescaledb_data_load_text):
+    connection = init_connection()
+    connection.autocommit = True
+    cursor = connection.cursor()
+
+    timescaledb_data_load_text.text("Data Being Written...")
+
+    try:
+        timescaledb_table_write_query =  """CREATE TABLE demo_write (
+                                    cdatetime DATE,
+                                    ts_values INTEGER
+                                    );"""
+        cursor.execute(timescaledb_table_write_query) #Creates the data inside the table
+        connection.commit()
+    except:
+        print("Table already exists - Writing Data")
+    try:
+        data_process_start_time_write = time.time() #Gets the start time before the data is written
+        timescaledb_write_query =  f"""WITH time_series AS (
+                                            SELECT * FROM generate_series(
+                                            '{timescaledb_start_datetime_write}'::timestamp,
+                                            '{timescaledb_end_datetime_write}'::timestamp,
+                                            '1 second'::interval
+                                            ) as cdatetime
+                                        ),
+                                        random_values AS (
+                                            SELECT random() * 100 AS ts_values -- Adjust range as needed
+                                            FROM generate_series(1, 5) -- Generate 5 random values
+                                        )
+                                        INSERT INTO demo_write (cdatetime, ts_values)
+                                        SELECT time_series.cdatetime, random_values.ts_values
+                                        FROM time_series
+                                        CROSS JOIN random_values;"""
+        cursor.execute(timescaledb_write_query) #Creates the data inside the table
+        connection.commit()
+        data_process_end_time_write = time.time() #Gets the end time after the data is written
+
+        total_rows_query_write =  f""" SELECT count(*) FROM demo_write  """
+        total_rows_write = pd.read_sql_query(total_rows_query_write, connection)
+        total_disk_usage_query_write = pd.read_sql_query("SELECT pg_size_pretty( pg_total_relation_size('demo_write'))", connection)
+
+        timescaledb_data_load_text.empty()
+        timescaledb_out_total_rows_write.text(f"Total Rows Written to Timescale Table: {total_rows_write.iloc[0]['count']:,}")
+        timescaledb_successful_write.text("Data successfully written to Timescale Database")
+        total_elapsed_time_timescaledb_write.text(f"Time to Write Data to Table: {round(data_process_end_time_write - data_process_start_time_write, 3)} seconds")
+        total_disk_usage_timescaledb_write.text(f"Total Disk Usage of Written Data: {total_disk_usage_query_write.iloc[0]['pg_size_pretty']}")
+    except:
+       st.error("Error writing data to timescaledb Database")
+    try:
+        drop_table_query_write = """DROP TABLE demo_write;""" #Removes the table before its recreated
+        cursor.execute(drop_table_query_write)
+        connection.commit()
+        connection.close()
+        print("Table Removed")
+    except:
+        print("Table empty")
+        connection.close()
+
+
+def timescaledb_data_write_benchmarking_setup():
+    #use sql to create a new table if not exist already. If exist, drop the table.
+    """Displays the layout of the timescaledb widgets in streamlit to send the data to the database"""
+    col1, col2 = st.columns([1,11])
+    with col2:
+        st.subheader("Timescale Write Data Benchmarking")
+
+    start_time_date_col_write, end_time_date_col_write = st.columns([1, 1]) #Creates columns for the start and end date / time pickers
+    with start_time_date_col_write:
+        start_date_timescaledb_write = st.date_input("Data Start Date:", datetime.date(2021, 1, 1), key="start_date_timescaledb_write")
+        start_time_timescaledb_write = st.time_input("Data Start Time:", key="start_time_timescaledb_write")
+    with end_time_date_col_write:
+        end_date_timescaledb_write = st.date_input("Data End Date:", datetime.date(2022, 1, 2), key="end_date_timescaledb_write")
+        end_time_timescaledb_write = st.time_input("Data End Time:", key="end_time_timescaledb_write")
+    timescaledb_start_datetime_write = datetime.datetime.combine(start_date_timescaledb_write, start_time_timescaledb_write) #concatenates the date and time
+    timescaledb_end_datetime_write = datetime.datetime.combine(end_date_timescaledb_write, end_time_timescaledb_write)
+
+    st.write("") #padding
+
+    #GUI chart widget placement
+    run_query_submit_write = st.button("Submit", key="submit_timescaledb_write")
+    timescaledb_data_load_text = st.empty()
+    timescaledb_successful_write = st.empty()
+    st.write("") # padding
+    total_disk_usage_timescaledb_write = st.empty() #Total disk usage
+    timescaledb_out_total_rows_write = st.empty()
+    total_elapsed_time_timescaledb_write = st.empty() #Empty templates in the place they will appear on the UI. Can be called at any time using any widget)
+
+    if run_query_submit_write:
+        if timescaledb_start_datetime_write > timescaledb_end_datetime_write:
+            st.error("Start date / time cannot be after end date / time")
+        else:
+            submit_clicked_timescaledb_write(timescaledb_start_datetime_write, timescaledb_end_datetime_write,total_elapsed_time_timescaledb_write, timescaledb_successful_write, timescaledb_out_total_rows_write,
+                                            total_disk_usage_timescaledb_write, timescaledb_data_load_text)
+
 ### Show Streamlit GUI
 timescaledb_data_benchmarking_setup()
+st.write("") #padding
+st.write("")
+st.write("")
+st.write("")
+st.write("")
+timescaledb_data_write_benchmarking_setup()

@@ -110,26 +110,6 @@ In chuser.xml, add the grant to the user profile:
     </chuser>
 ```
 
-Enable all user permissions
-```
-cd etc\clickhouse-server
-```
-
-In chuser.xml, add the grant to the user profile:
-```
-    <chuser>
-        <profile>ch_profile</profile>
-        <networks>
-                <ip>::/0</ip>
-        </networks>
-        <password>chuser_pwd</password>
-        <quota>ch_quota</quota>
-        <grants>
-        <query>GRANT ALL ON *.*</query>
-        </grants>
-    </chuser>
-```
-
 This will create a subdirectory ```.venv``` containing a virtual Python environment isolating the project from other projects on your computer. You may want to move across to using the poetry package manager as one of your deliverables. It handles dependencies in a more intelligent way than venv and pip.
 
 If you're using VS Code, note the .vscode directory which contains an entry allowing you to [start and debug](https://code.visualstudio.com/docs/languages/python#_debugging) the project.
@@ -213,11 +193,47 @@ CREATE TABLE demo_ts (
 );
 ```
 
-Note the Dockerfile is unused, but can be used at a later date for deployment as a Docker container, alongside the appropriate service in docker-compose.yml.
+## Configuring TimescaleDB
 
-This will create the ```psql_db``` container. Go to DBeaver and create a new connection to a Postgres database on port 5432 with the username ```postgres``` and password ```postgres```.
+To configure Timescale, run the command ```docker compose up timescaledb```. This will create the ```tmscl_db``` container. Go to DBeaver and create a new connection to a Timescale database on port 5433 with the username ```postgres``` and password ```postgres```. (Timescale uses Postgres)
 
-Once connected, create a table with the SQL command
+Once connected, create a table with the SQL command.
+
+```
+CREATE TABLE demo_ts (
+   cdatetime DATE,
+   ts_values INTEGER
+);
+```
+
+and generate some data with
+
+```
+WITH time_series AS (
+	SELECT * FROM generate_series(
+	  '2021-01-01 00:00:00'::timestamp,
+	  '2021-06-01 00:10:00'::timestamp,
+	  '1 second'::interval
+	) as cdatetime
+),
+random_values AS (
+    SELECT random() * 100 AS ts_values -- Adjust range as needed
+    FROM generate_series(1, 5) -- Generate 5 random values
+)
+INSERT INTO demo_ts (cdatetime, ts_values)
+SELECT time_series.cdatetime, random_values.ts_values
+FROM time_series
+CROSS JOIN random_values;
+```
+
+Lastly, in order to display the data on the Streamlit app, navigate to your ```.streamlit``` folder (default is at ```C:\Users\Username\.streamlit```) and create a ```secrets.toml``` file. Add the following code:
+
+```
+CREATE TABLE demo_ts (
+   cdatetime DATE,
+   ts_values INTEGER
+);
+```
 
 ## Configuring ArcticDB
 
@@ -228,6 +244,8 @@ To first install ArcticDB locally, run the command ```pip install arcticdb```.
 Create an Amazon AWS Account and set up an S3 bucket. Within the project .env file, add the URL for the S3 bucket ```'s3s://s3.eu-west-2.amazonaws.com:<bucket_name>?aws_auth=true'``` to ARCTIC_URL.
 
 Run the ```arcticdb_setup.py``` file by running ```python .\arcticdb_setup.py``` from the root folder (This may take some time). This sends the same dataset from the Clickhouse database to the Arctic storage.
+
+## Configuring ArcticDB
 
 ### Troubleshooting
 
@@ -242,7 +260,3 @@ toml.decoder.TomlDecodeError: Key group not on a line by itself. (line 1 column 
 ```
 
 If you get the error message shown above, go to your ```.streamlit``` folder on your computer (default is at ```C:\Users\Username\.streamlit```) and delete the ```config.toml``` file.
-
-## Very Initial Draft Example Screenshot of GUI
-
-![Early Draft Example](https://github.com/NickThorne123/db_bench/assets/115091926/e9310617-cec2-46a1-bc32-f8f1c8a9326f)

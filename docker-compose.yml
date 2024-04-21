@@ -59,8 +59,9 @@ services:
 
   timescaledb:
     shm_size: 512MB
-    image: timescale/timescaledb:latest-pg13
+    container_name: tmscl_db
     restart: always
+    image: timescale/timescaledb:latest-pg13
     ports:
       - 5433:5432
     logging: 
