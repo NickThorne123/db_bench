@@ -51,7 +51,7 @@ def submit_clicked_postgres(total_elapsed_time_postgres_downsampled, total_elaps
 
             df = pd.DataFrame(res_list, columns =['cdatetime','ts_values'])
             fig = px.line(df, x='cdatetime', y='ts_values')
-            fig.update_layout(xaxis_title='Date and Time', yaxis_title = 'Raw Value')
+            fig.update_layout(xaxis_title='Date and Time', yaxis_title = 'Raw Value', modebar_add=['v1hovermode', 'toggleSpikeLines'])
             fig.update_xaxes(range=[postgresql_start_datetime, postgresql_end_datetime]) # Don't let chart autoscale as loses impact of how few samples we're pulling compared to downsampled
             postgres_out_raw_title.markdown("<h4 style='text-align: left;'>Raw Data Chart of 50,000 samples</h4>", unsafe_allow_html=True)
             postgres_out.plotly_chart(fig) # Plots a Plotly chart
@@ -74,7 +74,7 @@ def submit_clicked_postgres(total_elapsed_time_postgres_downsampled, total_elaps
                 data_process_end_time_downsampled = time.time() #Gets the start time before the data is processed
                 fig_agg_row_count = df_agg.shape[0]
                 fig_agg = px.line(df_agg, x='cdatetime', y='ts_values')
-                fig_agg.update_layout(xaxis_title='Date and Time', yaxis_title = 'Downsampled Value')
+                fig_agg.update_layout(xaxis_title='Date and Time', yaxis_title = 'Downsampled Value', modebar_add=['v1hovermode', 'toggleSpikeLines'])
                 fig_agg.update_xaxes(range=[postgresql_start_datetime, postgresql_end_datetime])
                 postgres_out_downsampled_title.markdown(f"<h4 style='text-align: left;'>Downsampled Data Chart ({fig_agg_row_count}/{downsampling_value} of {res_count:,} rows)</h4>", unsafe_allow_html=True)
                 postgres_out_downsampled.plotly_chart(fig_agg) #Plots a Plotly chart
@@ -135,12 +135,10 @@ def postgresql_data_benchmarking_setup():
 
 
 def submit_clicked_postgresql_write(postgresql_start_datetime_write, postgresql_end_datetime_write, total_elapsed_time_postgresql_write, postgresql_successful_write, postgresql_out_total_rows_write,
-                                    total_disk_usage_postgresql_write, postgresql_data_load_text):
+                                    total_disk_usage_postgresql_write):
     connection = init_connection()
     connection.autocommit = True
     cursor = connection.cursor()
-
-    postgresql_data_load_text.text("Data Being Written...")
 
     try:
         postgresql_table_write_query =  """CREATE TABLE demo_write (
@@ -177,7 +175,6 @@ def submit_clicked_postgresql_write(postgresql_start_datetime_write, postgresql_
             total_rows_write = pd.read_sql_query(total_rows_query_write, connection)
             total_disk_usage_query_write = pd.read_sql_query("SELECT pg_size_pretty( pg_total_relation_size('demo_write'))", connection)
 
-            postgresql_data_load_text.empty()
             postgresql_out_total_rows_write.text(f"Total Rows Written to Postgres Table: {total_rows_write.iloc[0]['count']:,}")
             postgresql_successful_write.text("Data successfully written to Postgres Database")
             total_elapsed_time_postgresql_write.text(f"Time to Write Data to Table: {round(data_process_end_time_write - data_process_start_time_write, 3)} seconds")
@@ -216,7 +213,6 @@ def postgresql_data_write_benchmarking_setup():
 
     #GUI chart widget placement
     run_query_submit_write = st.button("Submit", key="submit_postgresql_write")
-    postgresql_data_load_text = st.empty()
     postgresql_successful_write = st.empty()
     st.write("") # padding
     total_disk_usage_postgresql_write = st.empty() #Total disk usage
@@ -228,7 +224,7 @@ def postgresql_data_write_benchmarking_setup():
             st.error("Start date / time cannot be after end date / time")
         else:
             submit_clicked_postgresql_write(postgresql_start_datetime_write, postgresql_end_datetime_write,total_elapsed_time_postgresql_write, postgresql_successful_write, postgresql_out_total_rows_write,
-                                            total_disk_usage_postgresql_write, postgresql_data_load_text)
+                                            total_disk_usage_postgresql_write)
 
 ### Show Streamlit GUI
 postgresql_data_benchmarking_setup()

@@ -51,7 +51,7 @@ def submit_clicked_timescale(total_elapsed_time_timescale_downsampled, total_ela
 
             df = pd.DataFrame(res_list, columns =['cdatetime','ts_values'])
             fig = px.line(df, x='cdatetime', y='ts_values')
-            fig.update_layout(xaxis_title='Date and Time', yaxis_title = 'Raw Value')
+            fig.update_layout(xaxis_title='Date and Time', yaxis_title = 'Raw Value', modebar_add=['v1hovermode', 'toggleSpikeLines'])
             fig.update_xaxes(range=[timescaledb_start_datetime, timescaledb_end_datetime]) # Don't let chart autoscale as loses impact of how few samples we're pulling compared to downsampled
             timescale_out_raw_title.markdown("<h4 style='text-align: left;'>Raw Data Chart of 50,000 samples</h4>", unsafe_allow_html=True)
             timescale_out.plotly_chart(fig) # Plots a Plotly chart
@@ -73,7 +73,7 @@ def submit_clicked_timescale(total_elapsed_time_timescale_downsampled, total_ela
                 df_agg = pd.read_sql_query(downsample_query, connection)
                 fig_agg_row_count = df_agg.shape[0]
                 fig_agg = px.line(df_agg, x='cdatetime', y='ts_values')
-                fig_agg.update_layout(xaxis_title='Date and Time', yaxis_title = 'Downsampled Value')
+                fig_agg.update_layout(xaxis_title='Date and Time', yaxis_title = 'Downsampled Value', modebar_add=['v1hovermode', 'toggleSpikeLines'])
                 fig_agg.update_xaxes(range=[timescaledb_start_datetime, timescaledb_end_datetime])
                 timescale_out_downsampled_title.markdown(f"<h4 style='text-align: left;'>Downsampled Data Chart ({fig_agg_row_count}/{downsampling_value} of {res_count:,} rows)</h4>", unsafe_allow_html=True)
                 timescale_out_downsampled.plotly_chart(fig_agg) #Plots a Plotly chart

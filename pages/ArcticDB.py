@@ -52,7 +52,7 @@ def submit_clicked_arcticdb(total_elapsed_time_arcticdb_downsampled, total_elaps
 
             arctic_df = df.loc[df["cdatetime"].between(arcticdb_start_datetime, arcticdb_end_datetime)].iloc[:50000] #Gets the data between the selected dates and collects 50k samples
             fig = px.line(arctic_df, x="cdatetime", y="ts_values")
-            fig.update_layout(xaxis_title='Date and Time', yaxis_title = 'Raw Value')
+            fig.update_layout(xaxis_title='Date and Time', yaxis_title = 'Raw Value', modebar_add=['v1hovermode', 'toggleSpikeLines'])
             fig.update_xaxes(range=[arcticdb_start_datetime, arcticdb_end_datetime])
             arcticdb_out_raw_title.markdown("<h4 style='text-align: left;'>Raw Data Chart of 50,000 samples</h4>", unsafe_allow_html=True)
             arcticdb_out.plotly_chart(fig) # Plots a Plotly chart
@@ -74,7 +74,7 @@ def submit_clicked_arcticdb(total_elapsed_time_arcticdb_downsampled, total_elaps
 
                 fig_agg_row_count = df_agg.shape[0]
                 fig_agg = px.line(df_agg, y='ts_values')
-                fig_agg.update_layout(xaxis_title='Date and Time', yaxis_title = 'Downsampled Value')
+                fig_agg.update_layout(xaxis_title='Date and Time', yaxis_title = 'Downsampled Value', modebar_add=['v1hovermode', 'toggleSpikeLines'])
                 fig_agg.update_xaxes(range=[arcticdb_start_datetime, arcticdb_end_datetime])
                 arcticdb_out_downsampled_title.markdown(f"<h4 style='text-align: left;'>Downsampled Data Chart ({fig_agg_row_count}/{downsampling_value} of {res_count:,} rows)</h4>", unsafe_allow_html=True)
                 arcticdb_out_downsampled.plotly_chart(fig_agg) #Plots a Plotly chart
