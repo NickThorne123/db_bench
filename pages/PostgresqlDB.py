@@ -90,6 +90,7 @@ def postgresql_data_benchmarking_setup():
         st.image("./icons/postgresqlLogo.png", width=50)
     with col2:
         st.markdown("<h3 style='text-align: left;'>PostgreSQL</h3>", unsafe_allow_html=True)
+        st.subheader("PostgreSQL Read Data Benchmarking")
 
     start_time_date_col, end_time_date_col = st.columns([1, 1]) #Creates columns for the start and end date / time pickers
     with start_time_date_col:

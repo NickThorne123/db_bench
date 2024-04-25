@@ -90,6 +90,7 @@ def timescaledb_data_benchmarking_setup():
         st.image("./icons/TimescaleLogo.png", width=50)
     with col2:
         st.markdown("<h3 style='text-align: left;'>TimescaleDB</h3>", unsafe_allow_html=True)
+        st.subheader("TimescaleDB Read Data Benchmarking")
 
     start_time_date_col, end_time_date_col = st.columns([1, 1]) #Creates columns for the start and end date / time pickers
     with start_time_date_col:

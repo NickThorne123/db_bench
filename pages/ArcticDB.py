@@ -90,6 +90,7 @@ def arcticdb_data_benchmarking_setup():
         st.image("./icons/arcticLogo.png", width=50)
     with col2:
         st.markdown("<h3 style='text-align: left;'>ArcticDB</h3>", unsafe_allow_html=True)
+        st.subheader("ArcticDB Read Data Benchmarking")
 
     start_time_date_col, end_time_date_col = st.columns([1, 1]) #Creates columns for the start and end date / time pickers
     with start_time_date_col:
@@ -141,7 +142,6 @@ def submit_clicked_arcticdb_write(arcticdb_start_datetime_write, arcticdb_end_da
 
     try:
         with st.spinner("Clickhouse Data Being Created..."):
-            data_process_start_time_write = time.time() #Gets the start time before the data is written
             arcticdb_write_query =  f""" CREATE TABLE ts_db.arcticdb_demo_write
                                             ENGINE = MergeTree
                                             ORDER BY tuple()
@@ -155,7 +155,6 @@ def submit_clicked_arcticdb_write(arcticdb_start_datetime_write, arcticdb_end_da
                                                 12 * toMonth(toDateTime(arrayJoin(range(toUInt32(toDateTime('{arcticdb_start_datetime_write}')), toUInt32(toDateTime('{arcticdb_end_datetime_write}')), 1) ))) +
                                                 20 * (toYear(toDateTime(arrayJoin(range(toUInt32(toDateTime('{arcticdb_start_datetime_write}')), toUInt32(toDateTime('{arcticdb_end_datetime_write}')), 1) )))-{arcticdb_end_datetime_write.year}) as ts_values """
             client.execute(arcticdb_write_query, settings={'use_numpy': True}) #Creates the data inside the table
-            data_process_end_time_write = time.time() #Gets the end time after the data is written
 
             total_rows_query_write =  f""" SELECT count(*) FROM ts_db.arcticdb_demo_write  """
             total_rows_write = client.execute(total_rows_query_write, settings={'use_numpy': True})[0][0]
@@ -165,14 +164,16 @@ def submit_clicked_arcticdb_write(arcticdb_start_datetime_write, arcticdb_end_da
             ac.create_library("demo_ts_write")
             clickhouse_data = client.execute(clickhouse_get_data_query, settings={'use_numpy': True})
             df_write = pd.DataFrame(clickhouse_data)
+            data_process_start_time_write = time.time() #Gets the start time before the data is written
             db_bench_lib = ac["demo_ts_write"]
             db_bench_lib.write("demo_ts_frame_write", df_write)
+            data_process_end_time_write = time.time() #Gets the end time after the data is written
 
             from_storage_df = db_bench_lib.read("demo_ts_frame_write").data
             total_disk_usage_arcticdb_write.text(f"Total Disk Usage for ArcticDB Table: {round(sys.getsizeof(from_storage_df) / 1024 ** 2, 2)}MB")
             arcticdb_out_total_rows_write.text(f"Total Rows Written to arcticdb Table: {total_rows_write:,}")
             arcticdb_successful_write.text("Data successfully written to arcticdb Database")
-            total_elapsed_time_arcticdb_write.text(f"Time to Write Data to Table: {round(data_process_end_time_write - data_process_start_time_write, 3)} seconds")
+            total_elapsed_time_arcticdb_write.text(f"Time to Write Data to ArcticDB Table: {round(data_process_end_time_write - data_process_start_time_write, 3)} seconds")
     except:
        st.error("Error writing data to arcticdb Database")
     try:
