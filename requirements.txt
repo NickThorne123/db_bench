@@ -1,4 +1,5 @@
 clickhouse_driver==0.2.6
+postgres==4.0
 dash==2.16.1
 dash_bootstrap_components==1.5.0
 dash_daq==0.5.0
@@ -7,7 +8,7 @@ pandas==2.2.1
 Pillow==10.2.0
 plotly==5.18.0
 psutil==5.9.8
-psycopg2==2.9.9
+psycopg2-binary==2.9.9
 pytest==8.0.1
 python-dotenv==1.0.1
 st_pages==0.4.5
