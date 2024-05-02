@@ -36,7 +36,7 @@ def submit_clicked_arcticdb(total_elapsed_time_arcticdb_downsampled, total_elaps
     try:
         with st.spinner("ArcticDB Raw Data Loading..."):
             data_process_start_time_raw = time.time() #Gets the start time before the data is processed
-            ac = Arctic(uri=ARCTIC_URL)
+            ac = Arctic(ARCTIC_URL)
             db_bench_lib = ac["demo_ts"]
             from_storage_df = db_bench_lib.read("demo_ts_frame").data
             df = pd.DataFrame(from_storage_df)
@@ -138,7 +138,7 @@ def arcticdb_data_benchmarking_setup():
 def submit_clicked_arcticdb_write(arcticdb_start_datetime_write, arcticdb_end_datetime_write,total_elapsed_time_arcticdb_write, arcticdb_successful_write, arcticdb_out_total_rows_write,
                                     total_disk_usage_arcticdb_write):
     client = Client(host=CH_HOST, port=CH_PORT, settings={'use_numpy': True}, user=CH_USER, password=CH_PASSWORD)
-    ac = Arctic(uri=ARCTIC_URL)
+    ac = Arctic(ARCTIC_URL)
 
     try:
         with st.spinner("Clickhouse Data Being Created..."):
@@ -179,7 +179,7 @@ def submit_clicked_arcticdb_write(arcticdb_start_datetime_write, arcticdb_end_da
     try:
         drop_table_query_write = """DROP TABLE ts_db.arcticdb_demo_write""" #Removes the table before its recreated
         client.execute(drop_table_query_write, settings={'use_numpy': True})
-        db_bench_lib.delete("demo_ts_write") #Deletes the library from Arctic in the AWS Bucket
+        ac.delete_library("demo_ts_write") #Deletes the library from Arctic in the AWS Bucket
         print("Table Removed")
     except:
         print("Table empty")

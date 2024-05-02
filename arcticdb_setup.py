@@ -16,7 +16,7 @@ CH_DBNAME=os.getenv('CH_DBNAME')
 client = Client(host=CH_HOST, port=CH_PORT, settings={'use_numpy': True}, user=CH_USER, password=CH_PASSWORD)
 
 try:
-    ac = Arctic(uri=ARCTIC_URL)
+    ac = Arctic(ARCTIC_URL)
     ac.create_library("demo_ts")
 
     clickhouse_data_query =  f""" SELECT * from ts_db.demo_ts """
