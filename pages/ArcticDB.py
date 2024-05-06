@@ -48,7 +48,7 @@ def submit_clicked_arcticdb(total_elapsed_time_arcticdb_downsampled, total_elaps
             total_rows_text.text(f"Total Rows in ArcticDB Table: {len(from_storage_df):,}")
             #Get arcticdb table size
             total_disk_usage_arcticdb.text(f"Total Disk Usage for ArcticDB Table: {round(sys.getsizeof(from_storage_df) / 1024 ** 2, 2)}MB")
-            memory_usage_pre_raw = process.memory_info().rss / 1024 ** 2 #Gets the amount of RAM used before the process is being run in MB
+            #memory_usage_pre_raw = process.memory_info().rss / 1024 ** 2 #Gets the amount of RAM used before the process is being run in MB
 
             arctic_df = df.loc[df["cdatetime"].between(arcticdb_start_datetime, arcticdb_end_datetime)].iloc[:50000] #Gets the data between the selected dates and collects 50k samples
             fig = px.line(arctic_df, x="cdatetime", y="ts_values")
@@ -57,10 +57,10 @@ def submit_clicked_arcticdb(total_elapsed_time_arcticdb_downsampled, total_elaps
             arcticdb_out_raw_title.markdown("<h4 style='text-align: left;'>Raw Data Chart of 50,000 samples</h4>", unsafe_allow_html=True)
             arcticdb_out.plotly_chart(fig) # Plots a Plotly chart
 
-            memory_usage_post_raw = process.memory_info().rss / 1024 ** 2 #Gets the amount of RAM used before the process is being run in MB
+            #memory_usage_post_raw = process.memory_info().rss / 1024 ** 2 #Gets the amount of RAM used before the process is being run in MB
 
             total_elapsed_time_arcticdb_raw.text(f"Raw Samples Data Collection time: {round(data_process_end_time_raw - data_process_start_time_raw, 3)} seconds")
-            total_ram_usage_arcticdb_raw.text(f"RAM Usage: {round(memory_usage_post_raw - memory_usage_pre_raw, 2)}MB") #Shows the elapsed time and RAM usage to 3dp above the charts
+            #total_ram_usage_arcticdb_raw.text(f"RAM Usage: {round(memory_usage_post_raw - memory_usage_pre_raw, 2)}MB") #Shows the elapsed time and RAM usage to 3dp above the charts
 
         if downsampling_on_off: # If the downsampling toggle is selected and True
             with st.spinner("ArcticDB Downsampled Data Loading..."):
