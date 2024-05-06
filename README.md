@@ -3,9 +3,9 @@
 This is a public repo used for collaboration on a student project between Solent University and Rockstone Data Ltd.
 
 ## Problem Statement
-The number of different database technologies is expandin. Becoming more specialized to particular applications, with associated potential performance boosts (eg OLTP vs OLAP) and cost savings.
+The number of different database technologies is expanding. Becoming more specialised to particular applications, with associated potential performance boosts (eg OLTP vs OLAP) and cost savings.
 
-At Rockstone Data we have utilized a relatively new [column orientated database](https://atlan.com/what-is/columnar-database/) called ClickhouseDB to host very large time series data tables (700m+ rows). This class of database was first described in [‘C-Store: A Column-orientated DBMS’](https://people.brandeis.edu/~nga/papers/VLDB05.pdf) and outperforms traditional row orientated databases in both speed and storage.
+At Rockstone Data we have utilised a relatively new [column orientated database](https://atlan.com/what-is/columnar-database/) called ClickhouseDB to host very large time series data tables (700m+ rows). This class of database was first described in [‘C-Store: A Column-orientated DBMS’](https://people.brandeis.edu/~nga/papers/VLDB05.pdf) and outperforms traditional row orientated databases in both speed and storage.
 
 The project aim is to create an interactive demonstrator running on the company website clearly demonstrating these benefits vs ‘traditional’ or row-orientated databases.
 
@@ -226,14 +226,6 @@ FROM time_series
 CROSS JOIN random_values;
 ```
 
-Lastly, in order to display the data on the Streamlit app, navigate to your ```.streamlit``` folder (default is at ```C:\Users\Username\.streamlit```) and create a ```secrets.toml``` file. Add the following code:
-
-```
-CREATE TABLE demo_ts (
-   cdatetime DATE,
-   ts_values INTEGER
-);
-```
 ## Configuring ArcticDB
 
 #### Make sure Clickhouse DB is set up before configuring the ArcticDB database
