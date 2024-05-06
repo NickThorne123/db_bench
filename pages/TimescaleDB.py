@@ -43,7 +43,7 @@ def submit_clicked_timescale(total_elapsed_time_timescale_downsampled, total_ela
 
             res_count = pd.read_sql_query(f""" SELECT count(*) FROM demo_ts WHERE cdatetime BETWEEN DATE('{timescaledb_start_datetime}') AND DATE('{timescaledb_end_datetime}') """, connection).iloc[0]['count']
 
-            memory_usage_pre_raw = process.memory_info().rss / 1024 ** 2 #Gets the amount of RAM used before the process is being run in MB
+            #memory_usage_pre_raw = process.memory_info().rss / 1024 ** 2 #Gets the amount of RAM used before the process is being run in MB
 
             res_list =  pd.read_sql_query(f""" SELECT cdatetime, ts_values FROM demo_ts
                         WHERE cdatetime BETWEEN DATE('{timescaledb_start_datetime}') AND DATE('{timescaledb_end_datetime}')
@@ -57,10 +57,10 @@ def submit_clicked_timescale(total_elapsed_time_timescale_downsampled, total_ela
             timescale_out.plotly_chart(fig) # Plots a Plotly chart
 
             data_process_end_time_raw = time.time() #Gets the end time after data processing is complete
-            memory_usage_post_raw = process.memory_info().rss / 1024 ** 2 #Gets the amount of RAM used before the process is being run in MB
+            #memory_usage_post_raw = process.memory_info().rss / 1024 ** 2 #Gets the amount of RAM used before the process is being run in MB
 
             total_elapsed_time_timescale_raw.text(f"Raw Samples Execution time: {round(data_process_end_time_raw - data_process_start_time_raw, 3)} seconds")
-            total_ram_usage_timescale_raw.text(f"RAM Usage: {round(memory_usage_post_raw - memory_usage_pre_raw, 2)}MB") #Shows the elapsed time and RAM usage to 3dp above the charts
+            #total_ram_usage_timescale_raw.text(f"RAM Usage: {round(memory_usage_post_raw - memory_usage_pre_raw, 2)}MB") #Shows the elapsed time and RAM usage to 3dp above the charts
 
         if downsampling_on_off: # If the downsampling toggle is selected and True
             with st.spinner("TimescaleDB Downsampled Data Loading..."):
@@ -162,7 +162,7 @@ def submit_clicked_timescaledb_write(timescaledb_start_datetime_write, timescale
                                             ),
                                             random_values AS (
                                                 SELECT random() * 100 AS ts_values -- Adjust range as needed
-                                                FROM generate_series(1, 5) -- Generate 5 random values
+                                                FROM generate_series(1, 1.5) -- Uses a single value per second
                                             )
                                             INSERT INTO demo_write (cdatetime, ts_values)
                                             SELECT time_series.cdatetime, random_values.ts_values

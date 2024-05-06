@@ -240,7 +240,28 @@ CREATE TABLE demo_ts (
 
 To first install ArcticDB locally, run the command ```pip install arcticdb```.
 
-Create an Amazon AWS Account and set up an S3 bucket. Within the project .env file, add the URL for the S3 bucket ```'s3s://s3.eu-west-2.amazonaws.com:<bucket_name>?aws_auth=true'``` to ARCTIC_URL.
+Create an Amazon AWS Account and set up an S3 bucket. Within the project .env file, add the URL for the S3 bucket ```'s3s://s3.<REGION_NAME>.amazonaws.com:<BUCKET_NAME>?aws_auth=true'``` to ARCTIC_URL.
+
+To access the S3 bucket, IAM User Access can be set up on AWS. See https://docs.arcticdb.io/4.4.1/#getting-started for more information. The other option which is less recommended is making the bucket publically available by disabling the 'Block public access' settings and adding a statement to the 'Bucket Display'. These options can be found within the AWS bucket options.
+
+Public Bucket Policy:
+
+{
+  "Id": "BucketPolicy",
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllAccess",
+      "Action": "s3:*",
+      "Effect": "Allow",
+      "Resource": [
+         "arn:aws:s3:::<BUCKET_NAME>",
+         "arn:aws:s3:::<BUCKET_NAME>/*"
+      ],
+      "Principal": "*"
+    }
+  ]
+}
 
 Run the ```arcticdb_setup.py``` file by running ```python .\arcticdb_setup.py``` from the root folder (This may take some time). This sends the same dataset from the Clickhouse database to the Arctic storage.
 
