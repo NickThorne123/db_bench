@@ -238,6 +238,7 @@ To access the S3 bucket, IAM User Access can be set up on AWS. See https://docs.
 
 Public Bucket Policy:
 
+```
 {
   "Id": "BucketPolicy",
   "Version": "2012-10-17",
@@ -254,6 +255,7 @@ Public Bucket Policy:
     }
   ]
 }
+```
 
 Run the ```arcticdb_setup.py``` file by running ```python .\arcticdb_setup.py``` from the root folder (This may take some time). This sends the same dataset from the Clickhouse database to the Arctic storage.
 
