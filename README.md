@@ -8,7 +8,7 @@ All the databases below are running 1 Year and 10 Minutes worth of data. This eq
 |                                     | ClickhouseDB | PostgreSQL | TimeScaleDB | ArcticDB (Personal Tier AWS) |
 | -----------------                   | -----------  | ---------- | ----------- | ---------------------------- |
 | Raw Read (Seconds)                  | 0.339s       | 3.207s     | 4.399s      | 8.250s                       |
-| Read Total Disk Usage (Megabytes)   | 240.61 MB    | 1091 MB    | 1091 MB     | 481.21 MB                    |
+| Read Total Disk Usage (Megabytes)   | 240 MB    | 1091 MB    | 1091 MB     | 481 MB                    |
 | Downsampled (500 Samples) (Seconds) | 1.961s       | 11.370s    | 11.563s     | 5.972s                       |
 | Write (Seconds)                     | 1.553s       | 28.750s    | 26.299s     | 59.987s                      |
 | Write Total Disk Usage (Megabytes)  | 241.26 MB    | 1093 MB    | 1093 MB     | 482.52 MB                    |
